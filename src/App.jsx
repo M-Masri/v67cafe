@@ -264,7 +264,7 @@ const translations = {
     cafeHighlightsCta: 'مميزات الكافيه تحت زر الطلب',
     dailyCupProgress: 'تقدم أكواب اليوم',
     cupsSoldOutToday: 'انتهت أكواب اليوم',
-    cupsServedToday: 'تم تقديمها اليوم',
+    cupsServedToday: 'اتقدمت اليوم',
     allRightsReserved: 'جميع الحقوق محفوظة.',
     shopMenu: 'منيو الطلب',
     noProductsYet: 'للحين ما فيه مشروبات متاحة.',
@@ -2464,7 +2464,7 @@ function App() {
           className="checkout-link"
           type="button"
           disabled={cartItems.length === 0}
-          onClick={() => openPage('/checkout')}
+          onClick={() => openOrderModal(2)}
         >
           {t('goToCheckout')}
         </button>

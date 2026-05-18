@@ -491,7 +491,7 @@
 .marquee__wrapper {
   --marquee-item-gap: 28px;
   --marquee-duration: 24s;
-  width: min(560px, 100%);
+  width: min(920px, 100%);
   display: block;
   position: relative;
   overflow: hidden;
@@ -860,6 +860,7 @@
 }
 
 .daily-count-display span {
+  margin-top: 8px;
   color: #3f2618;
   font-size: clamp(0.78rem, 1vw, 0.98rem);
   font-weight: 850;
@@ -2557,7 +2558,7 @@ button:disabled {
   }
 
   .marquee__wrapper {
-    width: 100%;
+    width: 125%;
   }
 
   .marquee__item {

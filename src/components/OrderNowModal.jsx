@@ -329,6 +329,9 @@ function OrderNowModal({
   const canContinueFromProducts = cartCups > 0 && !soldOut
   const canContinueFromCheckout = isCheckoutPhoneValid
   const loyaltyData = loyaltyState?.data
+  const loyaltyMessage = language === 'ar'
+    ? (loyaltyData?.message_ar || loyaltyData?.message_en || loyaltyData?.message || '')
+    : (loyaltyData?.message_en || loyaltyData?.message_ar || loyaltyData?.message || '')
   const hasFreeReward = Boolean(loyaltyData?.has_free_reward)
   const freeCupsAvailable = Number(loyaltyData?.free_cups_available || 0)
   const t = (key) => getModalText(language, key)
@@ -639,8 +642,7 @@ function OrderNowModal({
                   {loyaltyState?.loading ? <p className="field-hint">{t('checkingLoyalty')}</p> : null}
                   {loyaltyState?.error ? <p className="field-hint error">{loyaltyState.error}</p> : null}
 
-                  {loyaltyData?.message_en ? <p className="field-hint">{loyaltyData.message_en}</p> : null}
-                  {loyaltyData?.message_ar ? <p className="field-hint">{loyaltyData.message_ar}</p> : null}
+                  {loyaltyMessage ? <p className="field-hint">{loyaltyMessage}</p> : null}
 
                   {hasFreeReward ? (
                     <>
