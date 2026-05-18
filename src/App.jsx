@@ -1012,6 +1012,27 @@ function App() {
             </button>
           </div>
 
+          <div className="marquee__wrapper" aria-label="Cafe highlights under order button">
+            <div className="marquee__content">
+              <div className="marquee__repeated-items">
+                {marqueeItems.map((item) => (
+                  <div className="marquee__item" key={`${item.id}-cta` }>
+                    <item.Icon className="marquee__icon" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="marquee__content" aria-hidden="true">
+              <div className="marquee__repeated-items">
+                {marqueeItems.map((item) => (
+                  <div className="marquee__item" key={`${item.id}-cta-duplicate`}>
+                    <item.Icon className="marquee__icon" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           
         </div>
         
