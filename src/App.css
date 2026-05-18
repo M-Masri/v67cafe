@@ -817,9 +817,20 @@
   text-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
 }
 
-.inner-hero {
+.route-menu .inner-hero,
+.route-about-us .inner-hero,
+.route-contact-us .inner-hero {
   background-image: none !important;
-  background-color: #d1b089;
+  background-color: var(--hero-color-a);
+}
+
+.route-menu .inner-hero::before,
+.route-menu .inner-hero::after,
+.route-about-us .inner-hero::before,
+.route-about-us .inner-hero::after,
+.route-contact-us .inner-hero::before,
+.route-contact-us .inner-hero::after {
+  display: none;
 }
 
 .inner-hero .hero-kicker,

@@ -1059,59 +1059,6 @@ function App() {
 
   const renderMenuSections = () => (
     <div className="page-sections menu-page-sections">
-      <section className="category-slider-shell" aria-label="Menu categories">
-        <button
-          type="button"
-          className="category-scroll-button left"
-          aria-label="Scroll categories left"
-          disabled={!canScrollCategoriesLeft}
-          onClick={() => scrollCategories(-1)}
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <div className="category-slider-viewport" ref={categorySliderRef}>
-          <div className="category-slider">
-            <button
-              type="button"
-              className={`category-slide ${activeCategorySlug === 'all' ? 'active' : ''}`}
-              onClick={() => setSelectedCategorySlug('all')}
-            >
-              <img src={fallbackHero} alt="All drinks" />
-              <span>All drinks</span>
-              <strong>{products.length}</strong>
-            </button>
-            {categories.map((category, index) => {
-              const categoryProducts = products.filter((product) => product.category?.slug === category.slug)
-
-              return (
-                <button
-                  type="button"
-                  className={`category-slide ${activeCategorySlug === category.slug ? 'active' : ''}`}
-                  key={category.id}
-                  onClick={() => setSelectedCategorySlug(category.slug)}
-                >
-                  <img
-                    src={category.image_url || fallbackImages[index % fallbackImages.length]}
-                    alt={category.name}
-                  />
-                  <span>{category.name}</span>
-                  <strong>{categoryProducts.length}</strong>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-        <button
-          type="button"
-          className="category-scroll-button right"
-          aria-label="Scroll categories right"
-          disabled={!canScrollCategoriesRight}
-          onClick={() => scrollCategories(1)}
-        >
-          <ChevronRight size={18} />
-        </button>
-      </section>
-
       <section className="section-shell menu-shop-shell">
         <div className="shop-grid" aria-label="Shop menu">
           {isCatalogLoading
@@ -1127,7 +1074,7 @@ function App() {
                 </div>
               </article>
             ))
-            : filteredProducts.map((product, index) => (
+            : products.map((product, index) => (
             <article className="shop-card" key={product.id}>
               <img
                 src={product.image_url || fallbackImages[index % fallbackImages.length]}
@@ -1151,8 +1098,8 @@ function App() {
             </article>
           ))}
         </div>
-        {!isCatalogLoading && filteredProducts.length === 0 ? (
-          <p className="empty-menu-copy">No drinks are available in this category yet.</p>
+        {!isCatalogLoading && products.length === 0 ? (
+          <p className="empty-menu-copy">No drinks are available yet.</p>
         ) : null}
       </section>
     </div>
