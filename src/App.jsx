@@ -1,22 +1,32 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  Bean,
   ChevronLeft,
   ChevronRight,
+  Coffee,
+  CupSoda,
+  IceCreamBowl,
+  Menu,
   Minus,
+  Package,
   Plus,
   ShoppingBag,
   Trash2,
+  Wheat,
   X,
 } from 'lucide-react'
-import { isValidPhoneNumber } from 'react-phone-number-input'
-import PhoneInput from 'react-phone-number-input/input'
-import { AnimatePresence, motion } from 'framer-motion'
+import { FaCookieBite, FaIceCream, FaMugHot } from 'react-icons/fa'
+import { GiCoffeeBeans, GiCoffeeCup, GiCoffeePot,GiDonut, GiIceCube } from 'react-icons/gi'
+import { LuCroissant } from "react-icons/lu";
+import ReactPhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
 import './App.css'
+
+const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
 import fallbackLogo from './assets/v67-logo.svg'
 import OrderNowModal from './components/OrderNowModal'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
-const HERO_AUTO_SLIDE_MS = 10000
 const fallbackHero = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1800&q=85'
 const fallbackImages = [
   'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=80',
@@ -122,6 +132,20 @@ function normalizeWhatsAppLink(value) {
   return digits ? `https://wa.me/${digits}` : '#'
 }
 
+function normalizePhoneForStorage(value) {
+  const digits = String(value || '').replace(/\D/g, '')
+
+  return digits ? `+${digits}` : ''
+}
+
+function normalizePhoneForInput(value) {
+  return String(value || '').replace(/\D/g, '')
+}
+
+function isValidInternationalPhone(value) {
+  return /^\+\d{8,15}$/.test(String(value || ''))
+}
+
 function FacebookIcon(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
@@ -145,6 +169,131 @@ function WhatsAppIcon(props) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
       <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-5A8.5 8.5 0 1 1 21 11.5Z" />
       <path d="M9.5 9.5c.3-1 1-.9 1.3-.9h.4c.1 0 .3 0 .4.3l.6 1.5c.1.2 0 .4-.1.6l-.5.6c-.1.1-.2.3-.1.5.3.6.8 1.2 1.4 1.7.7.6 1.3 1 2.1 1.3.2.1.4 0 .5-.1l.6-.7c.2-.2.4-.2.6-.1l1.4.7c.2.1.3.2.3.4v.4c0 .4.1 1-.8 1.3-.8.3-2.7.1-4.5-1.6-1.6-1.5-2.6-3.5-2.1-4.5Z" />
+    </svg>
+  )
+}
+
+function CafeCupIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M4 10h11v5a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z" />
+      <path d="M15 11h2.4a2.6 2.6 0 1 1 0 5.2H15" />
+      <path d="M6 22h10" />
+      <path d="M8.5 7.4c0-.9.8-1.4 1.2-2" />
+      <path d="M11.5 7.4c0-.9.8-1.4 1.2-2" />
+    </svg>
+  )
+}
+
+function CoffeeBeanIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M12 4c4.4 0 8 3.3 8 8s-3.6 8-8 8-8-3.3-8-8 3.6-8 8-8z" />
+      <path d="M13.2 5.6c-2.3 2.4-3 4.4-2.5 6.6.5 2.2 1.9 3.9 3.7 6.2" />
+    </svg>
+  )
+}
+
+function CroissantIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M5.5 15.5c0-3.9 2.9-7 6.5-7s6.5 3.1 6.5 7" />
+      <path d="M5.5 15.5a3 3 0 0 0 3 3h7a3 3 0 0 0 3-3" />
+      <path d="M8.2 11.3c1.1.8 2.4 1.2 3.8 1.2 1.5 0 2.8-.4 3.8-1.2" />
+    </svg>
+  )
+}
+
+function CoffeeSteamIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M8 6c1 1.1 1 2.4 0 3.5" />
+      <path d="M12 4c1.3 1.3 1.3 3 0 4.3" />
+      <path d="M16 6c1 1.1 1 2.4 0 3.5" />
+      <path d="M5 12h11v4a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" />
+      <path d="M16 13h1.6a1.8 1.8 0 0 1 0 3.6H16" />
+    </svg>
+  )
+}
+
+function EspressoShotIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M5 9h10v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" />
+      <path d="M15 10h1.8a1.7 1.7 0 0 1 0 3.4H15" />
+      <path d="M7 21h8" />
+      <path d="M7 7h6" />
+    </svg>
+  )
+}
+
+function DonutIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="7" />
+      <circle cx="12" cy="12" r="2.2" />
+      <path d="M8.4 8.9c.6-.5 1.2-.7 1.9-.6" />
+      <path d="M14.1 8.3c.6 0 1.1.2 1.6.6" />
+      <path d="M15.2 15.1c-.5.5-1.1.8-1.8.8" />
+    </svg>
+  )
+}
+
+function CookieIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="7" />
+      <circle cx="10" cy="9.5" r=".8" fill="currentColor" stroke="none" />
+      <circle cx="14.5" cy="10.4" r=".8" fill="currentColor" stroke="none" />
+      <circle cx="9.8" cy="14.2" r=".8" fill="currentColor" stroke="none" />
+      <circle cx="14" cy="14.8" r=".8" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+function IceIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M12 3v18" />
+      <path d="M4.2 7.5 19.8 16.5" />
+      <path d="M19.8 7.5 4.2 16.5" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  )
+}
+
+function FrenchPressIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M8 4h8" />
+      <path d="M12 4v5" />
+      <path d="M7 9h10v9a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z" />
+      <path d="M17 11h1.5a1.5 1.5 0 0 1 0 3H17" />
+    </svg>
+  )
+}
+
+function ColdBrewIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M8 4h8" />
+      <path d="M9 4v2" />
+      <path d="M15 4v2" />
+      <path d="M7 8h10l-1 10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2z" />
+      <path d="M10 12h4" />
+      <path d="M10 15h4" />
+    </svg>
+  )
+}
+
+function GrinderIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M8 5h8" />
+      <path d="M12 5v2" />
+      <path d="M9 8h6v4H9z" />
+      <path d="M7 12h10v5a3 3 0 0 1-3 3h-4a3 3 0 0 1-3-3z" />
+      <path d="M17 14h2" />
     </svg>
   )
 }
@@ -215,13 +364,11 @@ function App() {
     }
   })
   const [cartOpen, setCartOpen] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [orderModalOpen, setOrderModalOpen] = useState(false)
   const [orderModalInitialStep, setOrderModalInitialStep] = useState(1)
   const [notice, setNotice] = useState('')
   const [scrolled, setScrolled] = useState(false)
-  const [heroSlideIndex, setHeroSlideIndex] = useState(0)
-  const [heroSlideDirection, setHeroSlideDirection] = useState(1)
-  const [heroSliderInView, setHeroSliderInView] = useState(false)
   const [token, setToken] = useState(() => localStorage.getItem('cafe67_token'))
   const [user, setUser] = useState(null)
   const [orders, setOrders] = useState([])
@@ -410,38 +557,19 @@ function App() {
     closes_at: '21:00',
   }
   const banner = catalog?.banner || {}
-  const heroSlides = useMemo(() => {
+  const activeHeroSlide = useMemo(() => {
     const bannerImage = banner.background_image_url || fallbackHero
 
-    return [
-      {
-        id: 'signature',
-        kicker: 'House selection',
-        title: banner.title || activePage.title,
-        description: banner.description || activePage.subtitle,
-        image: bannerImage,
-        colorA: '#201610',
-        colorB: '#4d3321',
-      },
-      {
-        id: 'sunrise',
-        kicker: 'Morning roast',
-        title: 'Sunrise Roast Service',
-        description: 'Balanced espresso notes with smooth milk textures, prepared to match the first rush of the day.',
-        image: fallbackImages[1] || bannerImage,
-        colorA: '#4d3321',
-        colorB: '#85603a',
-      },
-      {
-        id: 'night',
-        kicker: 'Evening pour',
-        title: 'Late Cup Signature',
-        description: 'A deep aromatic profile built for slower evenings and calm moments in the cafe.',
-        image: fallbackImages[2] || bannerImage,
-        colorA: '#2c1e15',
-        colorB: '#6a4c35',
-      },
-    ]
+    return {
+      id: 'signature',
+      kicker: 'House selection',
+      title: banner.title || activePage.title,
+      description: banner.description || activePage.subtitle,
+      image: bannerImage,
+      colorA: '#b8966d',
+      colorB: '#9f7d56',
+      colorC: '#f2c27b',
+    }
   }, [activePage.subtitle, activePage.title, banner.background_image_url, banner.description, banner.title])
   const products = useMemo(() => {
     if (catalog?.products?.length) {
@@ -469,6 +597,20 @@ function App() {
     instagram: settings.social_links?.instagram || '#',
     whatsapp: settings.social_links?.whatsapp || normalizeWhatsAppLink(settings.whatsapp),
   }
+  const marqueeItems = useMemo(
+    () => [
+      { id: 'coffee-cup', label: 'Coffee Cup', Icon: GiCoffeeCup },
+      { id: 'coffee-steam', label: 'Coffee Steam', Icon: FaMugHot },
+      { id: 'coffee-bean', label: 'Coffee Bean', Icon: GiCoffeeBeans },
+      { id: 'espresso-shot', label: 'Espresso Shot', Icon: GiCoffeePot },
+      { id: 'donut', label: 'Donut', Icon: GiDonut },
+      { id: 'cookie', label: 'Cookie', Icon: FaCookieBite },
+      { id: 'ice', label: 'Ice Cubes', Icon: GiIceCube },
+      { id: 'icecream', label: 'Ice Cream', Icon: FaIceCream },
+      { id: 'croissant', label: 'Croissant', Icon: LuCroissant },
+    ],
+    [],
+  )
 
   const cartItems = useMemo(
     () =>
@@ -485,7 +627,6 @@ function App() {
     0,
   )
   const cartCups = cartItems.reduce((total, item) => total + item.quantity, 0)
-  const activeHeroSlide = heroSlides[heroSlideIndex] || heroSlides[0]
   const activeCategorySlug = selectedCategorySlug === 'all'
     ? 'all'
     : (categories.some((category) => category.slug === selectedCategorySlug) ? selectedCategorySlug : 'all')
@@ -497,28 +638,7 @@ function App() {
     ? Math.max(0, Math.ceil((resendAvailableAt - resendNow) / 1000))
     : 0
   const canResendOtp = resendRemainingSeconds === 0
-  const isCheckoutPhoneValid = Boolean(checkoutForm.customer_phone)
-    && checkoutForm.customer_phone.startsWith('+971')
-    && isValidPhoneNumber(checkoutForm.customer_phone)
-
-  useEffect(() => {
-    if (heroSlideIndex >= heroSlides.length) {
-      setHeroSlideIndex(0)
-    }
-  }, [heroSlideIndex, heroSlides.length])
-
-  useEffect(() => {
-    if (activePage.path !== '/' || !heroSliderInView || heroSlides.length <= 1) {
-      return undefined
-    }
-
-    const timeout = window.setTimeout(() => {
-      setHeroSlideDirection(1)
-      setHeroSlideIndex((current) => (current + 1) % heroSlides.length)
-    }, HERO_AUTO_SLIDE_MS)
-
-    return () => window.clearTimeout(timeout)
-  }, [activePage.path, heroSliderInView, heroSlideIndex, heroSlides.length])
+  const isCheckoutPhoneValid = isValidInternationalPhone(checkoutForm.customer_phone)
 
   useEffect(() => {
     const slider = categorySliderRef.current
@@ -548,6 +668,7 @@ function App() {
     window.history.pushState({}, '', nextPath)
     setPath(nextPath)
     setCartOpen(false)
+    setMobileMenuOpen(false)
     setOrderModalOpen(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -556,32 +677,6 @@ function App() {
     setOrderModalInitialStep(step)
     setCartOpen(false)
     setOrderModalOpen(true)
-  }
-
-  const moveHeroSlide = (direction) => {
-    setHeroSlideDirection(direction)
-    setHeroSlideIndex((current) => {
-      const next = current + direction
-
-      if (next < 0) {
-        return heroSlides.length - 1
-      }
-
-      if (next >= heroSlides.length) {
-        return 0
-      }
-
-      return next
-    })
-  }
-
-  const goToHeroSlide = (index) => {
-    if (index === heroSlideIndex) {
-      return
-    }
-
-    setHeroSlideDirection(index > heroSlideIndex ? 1 : -1)
-    setHeroSlideIndex(index)
   }
 
   const closeOrderModal = () => {
@@ -865,192 +960,80 @@ function App() {
   }
 
   const renderHomeContent = () => (
-    <motion.section
+    <section
       className="home-showcase-card"
-      initial={false}
-      animate={{
+      style={{
         '--hero-color-a': activeHeroSlide.colorA,
         '--hero-color-b': activeHeroSlide.colorB,
+        '--hero-color-c': activeHeroSlide.colorC,
       }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      viewport={{ amount: 0.45, once: false }}
-      onViewportEnter={() => setHeroSliderInView(true)}
-      onViewportLeave={() => setHeroSliderInView(false)}
     >
-      <AnimatePresence custom={heroSlideDirection} mode="wait" initial={false}>
-        <motion.div
-          key={activeHeroSlide.id}
-          className="home-showcase-slide"
-          custom={heroSlideDirection}
-          initial={{ opacity: 0, x: heroSlideDirection > 0 ? 64 : -64 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: heroSlideDirection > 0 ? -64 : 64 }}
-          transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="home-showcase-copy">
-            <motion.div
-              className="home-showcase-brand"
-              initial={{ opacity: 0, y: 18, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -14, scale: 0.96 }}
-              transition={{ duration: 0.35 }}
-            >
-              <img src={brandLogo} alt={settings.cafe_name || 'Cafe 67'} />
-              <span>{settings.cafe_name || 'Cafe 67'}</span>
-            </motion.div>
+      <div className="home-showcase-slide">
+        <div className="home-showcase-copy">
+          <div className="home-showcase-brand">
+            <img src={brandLogo} alt={settings.cafe_name || 'Cafe 67'} />
+            {/* <span>{settings.cafe_name || 'Cafe 67'}</span> */}
+          </div>
 
-            <motion.div
-              className="home-showcase-text"
-              initial={{ opacity: 0, y: 24, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -18, scale: 0.97 }}
-              transition={{ duration: 0.48, delay: 0.04 }}
-            >
-              <p className="home-showcase-kicker">{activeHeroSlide.kicker}</p>
-              <h2>{activeHeroSlide.title}</h2>
-              <p>{activeHeroSlide.description}</p>
-            </motion.div>
-
-            <motion.div
-              className="daily-count-display"
-              aria-label="Daily cup progress"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.4, delay: 0.08 }}
-            >
-              <strong>{soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`}</strong>
-              <span>{soldOut ? 'cups sold out today' : 'cups served today'}</span>
-            </motion.div>
-
-            <motion.div
-              className="hero-cta-row"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.38, delay: 0.12 }}
-            >
-              <button
-                className="hero-primary-button"
-                type="button"
-                disabled={soldOut}
-                onClick={() => openOrderModal(1)}
-              >
-                {soldOut ? 'Sold Out' : 'Order Now'}
-              </button>
-              <button className="hero-secondary-button" type="button" onClick={() => openPage('/menu')}>
-                Explore menu
-              </button>
-            </motion.div>
-
-            <motion.div
-              className="home-showcase-footer"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.4, delay: 0.16 }}
-            >
-              <p className="hero-copyright">
-                &copy; {new Date().getFullYear()} {settings.cafe_name || 'Cafe 67'}. All rights reserved.
-              </p>
-              <div className="hero-social" aria-label="Social media links">
-                <a href={socialLinks.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
-                  <FacebookIcon />
-                </a>
-                <a href={socialLinks.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
-                  <InstagramIcon />
-                </a>
-                <a href={socialLinks.whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp">
-                  <WhatsAppIcon />
-                </a>
+          <div className="marquee__wrapper" aria-label="Cafe highlights">
+            <div className="marquee__content">
+              <div className="marquee__repeated-items">
+                {marqueeItems.map((item) => (
+                  <div className="marquee__item" key={item.id}>
+                    <item.Icon className="marquee__icon" />
+                  </div>
+                ))}
               </div>
-            </motion.div>
+            </div>
+            <div className="marquee__content" aria-hidden="true">
+              <div className="marquee__repeated-items">
+                {marqueeItems.map((item) => (
+                  <div className="marquee__item" key={`${item.id}-duplicate`}>
+                    <item.Icon className="marquee__icon" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="home-showcase-visual">
-            <motion.div
-              className="home-showcase-orb"
-              initial={{ opacity: 0, scale: 0.88 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.08 }}
-              transition={{ duration: 0.52 }}
-            />
-
-            <motion.div
-              className="home-showcase-image-ring"
-              initial={{ opacity: 0, x: 26, scale: 0.9 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -24, scale: 1.05 }}
-              transition={{ duration: 0.62, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <motion.img
-                key={activeHeroSlide.image}
-                src={activeHeroSlide.image}
-                alt={activeHeroSlide.title}
-                initial={{ opacity: 0, scale: 0.92 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.06 }}
-                transition={{ duration: 0.58 }}
-              />
-            </motion.div>
-
-            <motion.div
-              className="home-showcase-stat home-showcase-stat-top"
-              initial={{ opacity: 0, y: 14, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.96 }}
-              transition={{ duration: 0.36, delay: 0.08 }}
-            >
-              <span>Open today</span>
-              <strong>{shortTime(settings.opens_at)} - {shortTime(settings.closes_at || '21:00')}</strong>
-            </motion.div>
-
-            <motion.div
-              className="home-showcase-stat home-showcase-stat-bottom"
-              initial={{ opacity: 0, y: 14, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.96 }}
-              transition={{ duration: 0.36, delay: 0.14 }}
-            >
-              <span>Contact</span>
-              <strong>{settings.whatsapp || settings.phone || '+1 555 670 067'}</strong>
-            </motion.div>
+          <div className="daily-count-display" aria-label="Daily cup progress">
+            <strong>{soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`}</strong>
+            <span>{soldOut ? 'cups sold out today' : 'cups served today'}</span>
           </div>
-        </motion.div>
-      </AnimatePresence>
 
-      <div className="home-showcase-slider-controls" aria-label="Hero slider controls">
-        <button
-          type="button"
-          className="home-showcase-slider-arrow"
-          onClick={() => moveHeroSlide(-1)}
-          aria-label="Previous hero slide"
-        >
-          <ChevronLeft size={16} />
-        </button>
-
-        <div className="home-showcase-slider-dots" aria-label="Hero slide indicators">
-          {heroSlides.map((slide, index) => (
+          <div className="hero-cta-row">
             <button
-              key={slide.id}
+              className="hero-primary-button"
               type="button"
-              className={index === heroSlideIndex ? 'active' : ''}
-              onClick={() => goToHeroSlide(index)}
-              aria-label={`Show ${slide.title}`}
-            />
-          ))}
-        </div>
+              disabled={soldOut}
+              onClick={() => openOrderModal(1)}
+            >
+              {soldOut ? 'Sold Out' : 'Order Now'}
+            </button>
+          </div>
 
-        <button
-          type="button"
-          className="home-showcase-slider-arrow"
-          onClick={() => moveHeroSlide(1)}
-          aria-label="Next hero slide"
-        >
-          <ChevronRight size={16} />
-        </button>
+          
+        </div>
+        
       </div>
-    </motion.section>
+      <div className="home-showcase-footer">
+            <div className="hero-social" aria-label="Social media links">
+              <a href={socialLinks.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
+                <FacebookIcon />
+              </a>
+              <a href={socialLinks.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
+                <InstagramIcon />
+              </a>
+              <a href={socialLinks.whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp">
+                <WhatsAppIcon />
+              </a>
+            </div>
+            <p>
+          &copy; {new Date().getFullYear()} {settings.cafe_name || 'Cafe 67'}. All rights reserved.
+        </p>
+          </div>
+          
+    </section>
   )
 
   const renderMenuSections = () => (
@@ -1281,18 +1264,25 @@ function App() {
         <label>
           Phone number
           <PhoneInput
-            required
-            country="AE"
-            international
-            withCountryCallingCode
+            country="ae"
+            countryCodeEditable
             placeholder="+971 50 123 4567"
-            className="phone-field"
-            value={checkoutForm.customer_phone}
-            onChange={(value) => setCheckoutForm({ ...checkoutForm, customer_phone: value || '' })}
+            containerClass="phone-field"
+            inputClass="phone-field-input"
+            buttonClass="phone-field-flag"
+            value={normalizePhoneForInput(checkoutForm.customer_phone)}
+            onChange={(value) => {
+              const normalizedValue = normalizePhoneForStorage(value)
+              setCheckoutForm((current) => (
+                current.customer_phone === normalizedValue
+                  ? current
+                  : { ...current, customer_phone: normalizedValue }
+              ))
+            }}
           />
         </label>
         {!isCheckoutPhoneValid && checkoutForm.customer_phone ? (
-          <p className="field-hint error">Enter a valid UAE mobile number.</p>
+          <p className="field-hint error">Enter a valid phone number with country code.</p>
         ) : null}
         <label>
           Car number
@@ -1867,9 +1857,23 @@ function App() {
 
                 <div className="nav-actions">
                   <button
+                    className="menu-button"
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(true)
+                      setCartOpen(false)
+                    }}
+                    aria-label="Open menu"
+                  >
+                    <Menu size={18} />
+                  </button>
+                  <button
                     className="cart-button"
                     type="button"
-                    onClick={() => setCartOpen(true)}
+                    onClick={() => {
+                      setCartOpen(true)
+                      setMobileMenuOpen(false)
+                    }}
                     aria-label="Open cart"
                   >
                     <ShoppingBag size={18} />
@@ -1929,9 +1933,23 @@ function App() {
 
           <div className="nav-actions">
             <button
+              className="menu-button"
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(true)
+                setCartOpen(false)
+              }}
+              aria-label="Open menu"
+            >
+              <Menu size={18} />
+            </button>
+            <button
               className="cart-button"
               type="button"
-              onClick={() => setCartOpen(true)}
+              onClick={() => {
+                setCartOpen(true)
+                setMobileMenuOpen(false)
+              }}
               aria-label="Open cart"
             >
               <ShoppingBag size={18} />
@@ -1978,26 +1996,6 @@ function App() {
         applyCheckoutAddress={applyCheckoutAddress}
         onSubmitOrder={submitOrder}
       />
-
-      {activePage.path !== '/' ? (
-        <footer className="site-footer">
-          <p>
-            &copy; {new Date().getFullYear()} {settings.cafe_name || 'Cafe 67'}. All rights reserved.
-          </p>
-        </footer>
-      ) : null}
-
-      {cartItems.length > 0 && activePage.path !== '/checkout' ? (
-        <button
-          className="floating-checkout-button"
-          type="button"
-          onClick={() => openPage('/checkout')}
-        >
-          <span>Go to checkout</span>
-          <strong>{cartCups} cups · {money(cartTotal)}</strong>
-        </button>
-      ) : null}
-
       <aside className={`cart-drawer ${cartOpen ? 'open' : ''}`} aria-label="Shopping cart">
         <div className="cart-drawer-header">
           <strong>Your Cart</strong>
@@ -2047,6 +2045,28 @@ function App() {
         >
           Go to checkout
         </button>
+      </aside>
+
+      <aside className={`cart-drawer mobile-menu-drawer ${mobileMenuOpen ? 'open' : ''}`} aria-label="Mobile menu">
+        <div className="cart-drawer-header">
+          <strong>Menu</strong>
+          <button type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+            <X size={18} />
+          </button>
+        </div>
+
+        <nav className="mobile-menu-links" aria-label="Mobile navigation">
+          {navPages.map((page) => (
+            <a
+              key={page.path}
+              href={page.path}
+              className={page.path === activePage.path ? 'active' : ''}
+              onClick={(event) => openPage(page.path, event)}
+            >
+              {page.label}
+            </a>
+          ))}
+        </nav>
       </aside>
     </main>
   )
