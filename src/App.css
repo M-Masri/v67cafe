@@ -56,6 +56,38 @@
   line-height: 1.6;
 }
 
+@supports (-webkit-touch-callout: none) {
+  .site-shell[dir='rtl'] {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  .site-shell[dir='rtl'] .hero-inner h1,
+  .site-shell[dir='rtl'] .hero-kicker,
+  .site-shell[dir='rtl'] .hero-subtitle,
+  .site-shell[dir='rtl'] .home-showcase-kicker,
+  .site-shell[dir='rtl'] .daily-count-display span,
+  .site-shell[dir='rtl'] .home-showcase-stat span,
+  .site-shell[dir='rtl'] .section-heading p {
+    letter-spacing: 0;
+    line-height: 1.35;
+    -webkit-font-smoothing: antialiased;
+    font-kerning: normal;
+  }
+
+  .site-shell[dir='rtl'] .hero-inner h1 {
+    line-height: 1.12;
+    padding-block: 0.08em;
+    overflow: visible;
+  }
+
+  .site-shell[dir='rtl'] .route-home .hero-inner h1,
+  .site-shell[dir='rtl'] .inner-hero .hero-inner h1,
+  .site-shell[dir='rtl'] .route-menu .hero-inner h1 {
+    line-height: 1.16;
+  }
+}
+
 .site-nav {
   position: fixed;
   inset: 8px clamp(14px, 2.8vw, 40px) auto;
