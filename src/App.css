@@ -25,6 +25,37 @@
   background: transparent;
 }
 
+.site-shell[dir='rtl'] {
+  font-family: 'Noto Naskh Arabic', 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.site-shell[dir='rtl'] .site-nav nav a,
+.site-shell[dir='rtl'] .hero-kicker,
+.site-shell[dir='rtl'] .hero-subtitle,
+.site-shell[dir='rtl'] .home-showcase-kicker,
+.site-shell[dir='rtl'] .daily-count-display span,
+.site-shell[dir='rtl'] .home-showcase-stat span,
+.site-shell[dir='rtl'] .account-auth-kicker {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.site-shell[dir='rtl'] .site-nav nav a {
+  font-weight: 700;
+}
+
+.site-shell[dir='rtl'] .hero-subtitle,
+.site-shell[dir='rtl'] .daily-count-display span,
+.site-shell[dir='rtl'] .home-showcase-stat span,
+.site-shell[dir='rtl'] .account-auth-kicker,
+.site-shell[dir='rtl'] .section-heading p,
+.site-shell[dir='rtl'] .field-hint,
+.site-shell[dir='rtl'] .muted-copy {
+  line-height: 1.6;
+}
+
 .site-nav {
   position: fixed;
   inset: 8px clamp(14px, 2.8vw, 40px) auto;
