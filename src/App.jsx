@@ -1422,7 +1422,7 @@ function App() {
 
           <div className="daily-count-display" aria-label={t('dailyCupProgress')}>
             <strong>{soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`}</strong>
-            <span>{soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
+            <span >{soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
           </div>
 
           <div className="hero-cta-row">
