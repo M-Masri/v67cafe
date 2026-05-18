@@ -111,12 +111,281 @@ const pages = [
   },
 ]
 
+const translations = {
+  en: {
+    languageName: 'English',
+    languageShort: 'EN',
+    alternateLanguage: 'العربية',
+    all: 'All',
+    drink: 'Drink',
+    cups: 'cups',
+    each: 'each',
+    addToCart: 'Add to cart',
+    unavailable: 'Unavailable',
+    soldOut: 'Sold Out',
+    orderNow: 'Order Now',
+    notification: 'Notification',
+    dismissNotification: 'Dismiss notification',
+    openMenu: 'Open menu',
+    openCart: 'Open cart',
+    closeCart: 'Close cart',
+    closeMenu: 'Close menu',
+    yourCart: 'Your Cart',
+    noDrinksYet: 'No drinks added yet.',
+    goToCheckout: 'Go to checkout',
+    menu: 'Menu',
+    mobileMenu: 'Mobile menu',
+    mainNavigation: 'Main navigation',
+    mobileNavigation: 'Mobile navigation',
+    cafeHighlights: 'Cafe highlights',
+    cafeHighlightsCta: 'Cafe highlights under order button',
+    dailyCupProgress: 'Daily cup progress',
+    cupsSoldOutToday: 'cups sold out today',
+    cupsServedToday: 'cups served today',
+    allRightsReserved: 'All rights reserved.',
+    shopMenu: 'Shop menu',
+    noProductsYet: 'No drinks are available yet.',
+    cartItems: 'Cart items',
+    reviewDrinks: 'Review your drinks',
+    noItemsStartFromMenu: 'No items added yet. Start from the menu page.',
+    deliveryDetails: 'Delivery details',
+    deliveryInformation: 'Delivery information',
+    fullName: 'Full name',
+    phoneNumber: 'Phone number',
+    enterValidPhone: 'Enter a valid phone number with country code.',
+    carNumber: 'Car number',
+    notes: 'Notes',
+    placeOrder: 'Place order',
+    memberAccess: 'Member Access',
+    welcomeBackTo: 'Welcome Back to',
+    signInHelp: 'Sign in to access your account, manage orders, and update your delivery details.',
+    benefitOne: 'Track your recent orders with live status.',
+    benefitTwo: 'Save your address and speed up checkout.',
+    benefitThree: 'Recover your password from the same form.',
+    signIn: 'Sign In',
+    createAccount: 'Create Account',
+    forgotPassword: 'Forgot Password',
+    resetPassword: 'Reset Password',
+    loginHelp: 'Use your account credentials to continue.',
+    registerHelp: 'Set up your account details to get started.',
+    forgotHelp: 'Enter your email to receive a 6-digit OTP.',
+    resetHelp: 'Enter the OTP from your email and choose your new password.',
+    name: 'Name',
+    phone: 'Phone',
+    townCity: 'Town / City',
+    address: 'Address',
+    villaFloor: 'Villa No. / Floor No.',
+    email: 'Email',
+    password: 'Password',
+    enterPassword: 'Enter your password',
+    forgotPasswordQ: 'Forgot password?',
+    createAccountQ: 'Create account',
+    backToSignIn: 'Back to sign in',
+    login: 'Login',
+    sendOtp: 'Send OTP',
+    alreadyHaveOtp: 'Already have an OTP code?',
+    otpCode: 'OTP code',
+    otpPlaceholder: 'Enter 6-digit OTP',
+    newPassword: 'New password',
+    confirmPassword: 'Confirm password',
+    resendOtp: 'Resend OTP',
+    resendIn: 'Resend in',
+    accountCreated: 'Account created successfully.',
+    loggedIn: 'Logged in successfully.',
+    otpSent: 'OTP sent to your email.',
+    passwordReset: 'Password has been reset.',
+    profileUpdated: 'Profile updated.',
+    loggedOut: 'Logged out.',
+    cartEmpty: 'Your cart is empty.',
+    cupsNotEnough: 'Not enough cups remain today for this cart.',
+    mobileRequired: 'Mobile number is required to place the order.',
+    placeOrderFail: 'Failed to place order.',
+    loyaltyFail: 'Failed to check loyalty status.',
+    orderPlaced: 'Order {orderNo} placed. Total {total} (discount {discount}).',
+    pages: {
+      '/': {
+        label: 'Home',
+        kicker: 'Since 1871',
+        title: 'Fragrance of Dark Coffee',
+        subtitle: 'The warmth of the tropics and the elegance of the newest recipes.',
+      },
+      '/menu': {
+        label: 'Our Menu',
+        kicker: 'Shop today\'s menu',
+        title: 'Order From the Daily Counter',
+        subtitle: 'Live drink availability, prices, and remaining cups are loaded from the cafe backend.',
+      },
+      '/about-us': {
+        label: 'About Us',
+        kicker: 'The house standard',
+        title: 'Small-Batch Service With a Clear Limit',
+        subtitle: 'A calm ordering experience built around freshness, timing, and careful preparation.',
+      },
+      '/contact-us': {
+        label: 'Contact Us',
+        kicker: 'Contact and hours',
+        title: 'Speak With the Cafe Team',
+        subtitle: 'Use the contact details below for order support, delivery questions, and daily availability.',
+      },
+      '/checkout': {
+        label: 'Checkout',
+        kicker: 'Checkout',
+        title: 'Confirm Your Order Details',
+        subtitle: 'Review the selected drinks, adjust quantities, and send the order to the kitchen.',
+      },
+    },
+  },
+  ar: {
+    languageName: 'العربية الخليجية',
+    languageShort: 'AR',
+    alternateLanguage: 'English',
+    all: 'الكل',
+    drink: 'مشروب',
+    cups: 'كوب',
+    each: 'للكوب',
+    addToCart: 'ضيف للسلة',
+    unavailable: 'غير متوفر',
+    soldOut: 'خلصت الكمية',
+    orderNow: 'اطلب الحين',
+    notification: 'تنبيه',
+    dismissNotification: 'إغلاق التنبيه',
+    openMenu: 'فتح القائمة',
+    openCart: 'فتح السلة',
+    closeCart: 'إغلاق السلة',
+    closeMenu: 'إغلاق القائمة',
+    yourCart: 'سلتك',
+    noDrinksYet: 'ما ضفت أي مشروبات للحين.',
+    goToCheckout: 'روح لإتمام الطلب',
+    menu: 'القائمة',
+    mobileMenu: 'قائمة الجوال',
+    mainNavigation: 'التنقل الرئيسي',
+    mobileNavigation: 'تنقل الجوال',
+    cafeHighlights: 'مميزات الكافيه',
+    cafeHighlightsCta: 'مميزات الكافيه تحت زر الطلب',
+    dailyCupProgress: 'تقدم أكواب اليوم',
+    cupsSoldOutToday: 'انتهت أكواب اليوم',
+    cupsServedToday: 'تم تقديمها اليوم',
+    allRightsReserved: 'جميع الحقوق محفوظة.',
+    shopMenu: 'منيو الطلب',
+    noProductsYet: 'للحين ما فيه مشروبات متاحة.',
+    cartItems: 'عناصر السلة',
+    reviewDrinks: 'راجع مشروباتك',
+    noItemsStartFromMenu: 'ما فيه عناصر مضافة. ابدأ من صفحة المنيو.',
+    deliveryDetails: 'تفاصيل التسليم',
+    deliveryInformation: 'بيانات التسليم',
+    fullName: 'الاسم الكامل',
+    phoneNumber: 'رقم الجوال',
+    enterValidPhone: 'اكتب رقم جوال صحيح مع مفتاح الدولة.',
+    carNumber: 'رقم السيارة',
+    notes: 'ملاحظات',
+    placeOrder: 'تأكيد الطلب',
+    memberAccess: 'دخول الأعضاء',
+    welcomeBackTo: 'حياك الله من جديد في',
+    signInHelp: 'سجّل دخولك عشان تدير حسابك وطلباتك وتحدّث بيانات التوصيل.',
+    benefitOne: 'تابع طلباتك الأخيرة بحالة مباشرة.',
+    benefitTwo: 'احفظ عنوانك وخلّص الطلب بسرعة.',
+    benefitThree: 'تقدر تسترجع كلمة المرور من نفس النموذج.',
+    signIn: 'تسجيل دخول',
+    createAccount: 'إنشاء حساب',
+    forgotPassword: 'نسيت كلمة المرور',
+    resetPassword: 'إعادة تعيين كلمة المرور',
+    loginHelp: 'استخدم بيانات حسابك للمتابعة.',
+    registerHelp: 'أدخل بياناتك وأنشئ حسابك بسرعة.',
+    forgotHelp: 'اكتب إيميلك عشان يوصلك رمز OTP من 6 أرقام.',
+    resetHelp: 'اكتب رمز OTP اللي وصلك واختر كلمة مرور جديدة.',
+    name: 'الاسم',
+    phone: 'الجوال',
+    townCity: 'المنطقة / المدينة',
+    address: 'العنوان',
+    villaFloor: 'رقم الفيلا / رقم الطابق',
+    email: 'الإيميل',
+    password: 'كلمة المرور',
+    enterPassword: 'اكتب كلمة المرور',
+    forgotPasswordQ: 'نسيت كلمة المرور؟',
+    createAccountQ: 'إنشاء حساب',
+    backToSignIn: 'رجوع لتسجيل الدخول',
+    login: 'دخول',
+    sendOtp: 'إرسال OTP',
+    alreadyHaveOtp: 'عندك رمز OTP جاهز؟',
+    otpCode: 'رمز OTP',
+    otpPlaceholder: 'اكتب رمز OTP من 6 أرقام',
+    newPassword: 'كلمة المرور الجديدة',
+    confirmPassword: 'تأكيد كلمة المرور',
+    resendOtp: 'إعادة إرسال OTP',
+    resendIn: 'إعادة الإرسال بعد',
+    accountCreated: 'تم إنشاء الحساب بنجاح.',
+    loggedIn: 'تم تسجيل الدخول بنجاح.',
+    otpSent: 'تم إرسال OTP على إيميلك.',
+    passwordReset: 'تم تغيير كلمة المرور.',
+    profileUpdated: 'تم تحديث الملف الشخصي.',
+    loggedOut: 'تم تسجيل الخروج.',
+    cartEmpty: 'سلتك فاضية.',
+    cupsNotEnough: 'الكمية المتبقية اليوم ما تكفي لهالسلة.',
+    mobileRequired: 'رقم الجوال مطلوب لإتمام الطلب.',
+    placeOrderFail: 'صار خطأ في إرسال الطلب.',
+    loyaltyFail: 'صار خطأ أثناء التحقق من الولاء.',
+    orderPlaced: 'تم تأكيد الطلب {orderNo}. الإجمالي {total} (الخصم {discount}).',
+    pages: {
+      '/': {
+        label: 'الرئيسية',
+        kicker: 'من 1871',
+        title: 'عبق القهوة الداكنة',
+        subtitle: 'دفا المناطق الاستوائية مع لمسة وصفات عصرية.',
+      },
+      '/menu': {
+        label: 'المنيو',
+        kicker: 'اطلب من منيو اليوم',
+        title: 'اطلب مباشرة من كاونتر اليوم',
+        subtitle: 'توفّر المشروبات والأسعار والكمية المتبقية تتحدث مباشرة من النظام.',
+      },
+      '/about-us': {
+        label: 'من نحن',
+        kicker: 'معيار البيت',
+        title: 'خدمة دفعات صغيرة بحد يومي واضح',
+        subtitle: 'تجربة طلب هادئة مبنية على الطزاجة والتوقيت والتحضير الدقيق.',
+      },
+      '/contact-us': {
+        label: 'تواصل معنا',
+        kicker: 'التواصل وساعات العمل',
+        title: 'تواصل مع فريق الكافيه',
+        subtitle: 'تواصل معنا لدعم الطلبات والاستفسارات وتوفر المنيو اليومي.',
+      },
+      '/checkout': {
+        label: 'إتمام الطلب',
+        kicker: 'إتمام الطلب',
+        title: 'أكد تفاصيل طلبك',
+        subtitle: 'راجع مشروباتك وعدّل الكميات ثم أرسل الطلب للمطبخ.',
+      },
+    },
+  },
+}
+
+function getTranslation(language, key) {
+  const keys = key.split('.')
+  let value = translations[language]
+
+  for (const part of keys) {
+    value = value?.[part]
+  }
+
+  if (value !== undefined) {
+    return value
+  }
+
+  let fallbackValue = translations.en
+  for (const part of keys) {
+    fallbackValue = fallbackValue?.[part]
+  }
+
+  return fallbackValue ?? key
+}
+
 function normalizePath(pathname) {
   return pages.some((page) => page.path === pathname) ? pathname : '/'
 }
 
-function money(value) {
-  return new Intl.NumberFormat('en-US', {
+function money(value, locale = 'en-US') {
+  return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'USD',
   }).format(Number(value || 0))
@@ -342,18 +611,53 @@ async function requestJson(url, options = {}, authToken = null) {
   const data = await response.json().catch(() => ({}))
 
   if (!response.ok) {
-    throw new Error(
+    const error = new Error(
       data.message || Object.values(data.errors || {})?.[0]?.[0] || 'Request failed.',
     )
+    error.errors = data.errors || null
+    throw error
   }
 
   return data
+}
+
+function normalizePhoneForLoyalty(value) {
+  const digits = String(value || '').replace(/\D/g, '')
+
+  if (!digits) {
+    return ''
+  }
+
+  if (digits.startsWith('971') && digits.length === 12) {
+    return `0${digits.slice(3)}`
+  }
+
+  if (digits.startsWith('5') && digits.length === 9) {
+    return `0${digits}`
+  }
+
+  return digits
+}
+
+function getFirstErrorMessage(error, fallback) {
+  if (error?.errors) {
+    const firstEntry = Object.values(error.errors)[0]
+    if (Array.isArray(firstEntry) && firstEntry[0]) {
+      return firstEntry[0]
+    }
+  }
+
+  return error?.message || fallback
 }
 
 function App() {
   const [catalog, setCatalog] = useState(null)
   const [isCatalogLoading, setIsCatalogLoading] = useState(true)
   const [path, setPath] = useState(() => normalizePath(window.location.pathname))
+  const [language, setLanguage] = useState(() => {
+    const savedLanguage = localStorage.getItem('cafe67_language')
+    return savedLanguage === 'ar' ? 'ar' : 'en'
+  })
   const [cart, setCart] = useState(() => {
     try {
       const savedCart = JSON.parse(localStorage.getItem('cafe67_cart') || '[]')
@@ -409,7 +713,24 @@ function App() {
     car_number: '',
     delivery_address: '',
     customer_notes: '',
+    use_free_cup: false,
+    free_cups_to_use: '',
   })
+  const [loyaltyState, setLoyaltyState] = useState({
+    loading: false,
+    data: null,
+    error: '',
+  })
+  const locale = language === 'ar' ? 'ar-AE' : 'en-US'
+  const isArabic = language === 'ar'
+  const t = (key) => getTranslation(language, key)
+  const translateTemplate = (key, values = {}) => {
+    const template = t(key)
+    return Object.entries(values).reduce(
+      (text, [token, tokenValue]) => text.replaceAll(`{${token}}`, String(tokenValue)),
+      template,
+    )
+  }
 
   const hydrateAccount = async (authToken) => {
     const [me, history] = await Promise.all([
@@ -543,11 +864,37 @@ function App() {
     return () => window.clearTimeout(timeout)
   }, [notice])
 
-  const activePage = useMemo(
-    () => pages.find((page) => page.path === path) || pages[0],
-    [path],
+  useEffect(() => {
+    localStorage.setItem('cafe67_language', language)
+    document.documentElement.lang = isArabic ? 'ar' : 'en'
+    document.documentElement.dir = isArabic ? 'rtl' : 'ltr'
+  }, [isArabic, language])
+
+  const pageTranslations = useMemo(() => t('pages'), [language])
+  const activePage = useMemo(() => {
+    const page = pages.find((entry) => entry.path === path) || pages[0]
+    const translated = pageTranslations?.[page.path] || {}
+
+    return {
+      ...page,
+      label: translated.label || page.label,
+      kicker: translated.kicker || page.kicker,
+      title: translated.title || page.title,
+      subtitle: translated.subtitle || page.subtitle,
+    }
+  }, [pageTranslations, path])
+  const navPages = useMemo(
+    () => pages
+      .map((page) => {
+        const translated = pageTranslations?.[page.path] || {}
+        return {
+          ...page,
+          label: translated.label || page.label,
+        }
+      })
+      .filter((page) => page.path !== '/checkout'),
+    [pageTranslations],
   )
-  const navPages = pages.filter((page) => page.path !== '/checkout')
   const settings = catalog?.settings || {
     cafe_name: 'Cafe 67',
     logo_url: fallbackLogo,
@@ -639,6 +986,57 @@ function App() {
     : 0
   const canResendOtp = resendRemainingSeconds === 0
   const isCheckoutPhoneValid = isValidInternationalPhone(checkoutForm.customer_phone)
+
+  useEffect(() => {
+    if (!orderModalOpen) {
+      return
+    }
+
+    const mobileNumber = normalizePhoneForLoyalty(checkoutForm.customer_phone)
+
+    if (!mobileNumber) {
+      setLoyaltyState({ loading: false, data: null, error: '' })
+      return
+    }
+
+    let active = true
+
+    setLoyaltyState((current) => ({ ...current, loading: true, error: '' }))
+
+    const timeout = window.setTimeout(() => {
+      requestJson(
+        `${API_URL}/loyalty/check`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ mobile_number: mobileNumber }),
+        },
+        token,
+      )
+        .then((data) => {
+          if (!active) {
+            return
+          }
+
+          setLoyaltyState({ loading: false, data, error: '' })
+        })
+        .catch((error) => {
+          if (!active) {
+            return
+          }
+
+          setLoyaltyState({
+            loading: false,
+            data: null,
+            error: getFirstErrorMessage(error, t('loyaltyFail')),
+          })
+        })
+    }, 300)
+
+    return () => {
+      active = false
+      window.clearTimeout(timeout)
+    }
+  }, [API_URL, checkoutForm.customer_phone, orderModalOpen, token])
 
   useEffect(() => {
     const slider = categorySliderRef.current
@@ -758,8 +1156,8 @@ function App() {
     setToken(data.token)
     setNotice(
       authMode === 'register'
-        ? 'Account created successfully.'
-        : 'Logged in successfully.',
+        ? t('accountCreated')
+        : t('loggedIn'),
     )
     await hydrateAccount(data.token)
   }
@@ -772,7 +1170,7 @@ function App() {
       { method: 'POST', body: JSON.stringify(forgotForm) },
       null,
     )
-    setNotice(data.message || 'OTP sent to your email.')
+    setNotice(data.message || t('otpSent'))
     setResetForm((current) => ({ ...current, email: forgotForm.email }))
     setResendAvailableAt(Date.now() + (data.resend_after_seconds || 120) * 1000)
     setResendNow(Date.now())
@@ -793,7 +1191,7 @@ function App() {
 
     setForgotForm({ email })
     setResetForm((current) => ({ ...current, email }))
-    setNotice(data.message || 'OTP sent to your email.')
+    setNotice(data.message || t('otpSent'))
     setResendAvailableAt(Date.now() + (data.resend_after_seconds || 120) * 1000)
     setResendNow(Date.now())
   }
@@ -806,7 +1204,7 @@ function App() {
       { method: 'POST', body: JSON.stringify(resetForm) },
       null,
     )
-    setNotice(data.message || 'Password has been reset.')
+    setNotice(data.message || t('passwordReset'))
     setResetForm({ email: '', otp: '', password: '', password_confirmation: '' })
     setResendAvailableAt(null)
     setAuthMode('login')
@@ -840,7 +1238,7 @@ function App() {
       customer_phone: savedAddresses.find((address) => address.is_default)?.phone || data.user.phone || current.customer_phone,
       delivery_address: formatAddress(savedAddresses.find((address) => address.is_default) || savedAddresses[0]) || current.delivery_address,
     }))
-    setNotice('Profile updated.')
+    setNotice(t('profileUpdated'))
   }
 
   const openAccountView = (nextView, event) => {
@@ -911,48 +1309,74 @@ function App() {
     setUserAddresses([{ ...emptyAddress, is_default: true }])
     setSelectedCheckoutAddressId(null)
     setAccountView('dashboard')
-    setNotice('Logged out.')
+    setNotice(t('loggedOut'))
   }
 
   const submitOrder = async (event) => {
     event?.preventDefault?.()
 
     if (cartItems.length === 0) {
-      setNotice('Your cart is empty.')
+      setNotice(t('cartEmpty'))
       return
     }
 
     if (cartCups > dailyLimit.remaining_cups) {
-      setNotice('Not enough cups remain today for this cart.')
+      setNotice(t('cupsNotEnough'))
+      return
+    }
+
+    const mobileNumber = normalizePhoneForLoyalty(checkoutForm.customer_phone)
+
+    if (!mobileNumber) {
+      setNotice(t('mobileRequired'))
       return
     }
 
     const body = {
-      customer_name: checkoutForm.customer_name,
-      customer_phone: checkoutForm.customer_phone,
-      car_number: [checkoutForm.car_type, checkoutForm.car_number].filter(Boolean).join(' - '),
-      customer_notes: checkoutForm.customer_notes,
+      customer_name: checkoutForm.customer_name || null,
+      mobile_number: mobileNumber,
+      car_model: checkoutForm.car_type || null,
+      car_number: checkoutForm.car_number || null,
+      customer_notes: checkoutForm.customer_notes || null,
+      use_free_cup: Boolean(checkoutForm.use_free_cup),
+      free_cups_to_use: checkoutForm.use_free_cup
+        ? (checkoutForm.free_cups_to_use ? Number(checkoutForm.free_cups_to_use) : null)
+        : null,
       items: cartItems.map((item) => ({
         product_id: item.product_id,
         quantity: item.quantity,
       })),
     }
 
-    const data = await requestJson(
-      `${API_URL}/orders`,
-      {
-        method: 'POST',
-        body: JSON.stringify(body),
-      },
-      token,
-    )
+    let data
+
+    try {
+      data = await requestJson(
+        `${API_URL}/orders`,
+        {
+          method: 'POST',
+          body: JSON.stringify(body),
+        },
+        token,
+      )
+    } catch (error) {
+      setNotice(getFirstErrorMessage(error, t('placeOrderFail')))
+      return
+    }
 
     setCart([])
     setOrderModalOpen(false)
     setCatalog((current) => ({ ...current, daily_limit: data.daily_limit }))
-    setNotice(
-      `Order ${data.order.order_number} placed. ${data.daily_limit.remaining_cups} cups remain today.`,
-    )
+    setNotice(translateTemplate('orderPlaced', {
+      orderNo: data.order.order_number,
+      total: money(data.order.total, locale),
+      discount: money(data.order.discount_total, locale),
+    }))
+    setCheckoutForm((current) => ({
+      ...current,
+      use_free_cup: false,
+      free_cups_to_use: '',
+    }))
     if (token) {
       await hydrateAccount(token)
     }
@@ -975,8 +1399,8 @@ function App() {
             {/* <span>{settings.cafe_name || 'Cafe 67'}</span> */}
           </div>
 
-          <div className="marquee__wrapper" aria-label="Cafe highlights">
-            <div className="marquee__content">
+          <div className="marquee__wrapper" aria-label={t('cafeHighlights')}>
+            <div className="marquee__track marquee__track--primary">
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={item.id}>
@@ -985,7 +1409,7 @@ function App() {
                 ))}
               </div>
             </div>
-            <div className="marquee__content" aria-hidden="true">
+            <div className="marquee__track marquee__track--clone" aria-hidden="true">
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={`${item.id}-duplicate`}>
@@ -996,9 +1420,9 @@ function App() {
             </div>
           </div>
 
-          <div className="daily-count-display" aria-label="Daily cup progress">
+          <div className="daily-count-display" aria-label={t('dailyCupProgress')}>
             <strong>{soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`}</strong>
-            <span>{soldOut ? 'cups sold out today' : 'cups served today'}</span>
+            <span>{soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
           </div>
 
           <div className="hero-cta-row">
@@ -1008,12 +1432,12 @@ function App() {
               disabled={soldOut}
               onClick={() => openOrderModal(1)}
             >
-              {soldOut ? 'Sold Out' : 'Order Now'}
+              {soldOut ? t('soldOut') : t('orderNow')}
             </button>
           </div>
 
-          <div className="marquee__wrapper" aria-label="Cafe highlights under order button">
-            <div className="marquee__content">
+          <div className="marquee__wrapper marquee__wrapper--reverse" aria-label={t('cafeHighlightsCta')}>
+            <div className="marquee__track marquee__track--primary">
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={`${item.id}-cta` }>
@@ -1022,7 +1446,7 @@ function App() {
                 ))}
               </div>
             </div>
-            <div className="marquee__content" aria-hidden="true">
+            <div className="marquee__track marquee__track--clone" aria-hidden="true">
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={`${item.id}-cta-duplicate`}>
@@ -1038,7 +1462,7 @@ function App() {
         
       </div>
       <div className="home-showcase-footer">
-            <div className="hero-social" aria-label="Social media links">
+            <div className="hero-social" aria-label={isArabic ? 'روابط التواصل الاجتماعي' : 'Social media links'}>
               <a href={socialLinks.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
                 <FacebookIcon />
               </a>
@@ -1050,7 +1474,7 @@ function App() {
               </a>
             </div>
             <p>
-          &copy; {new Date().getFullYear()} {settings.cafe_name || 'Cafe 67'}. All rights reserved.
+          &copy; {new Date().getFullYear()} {settings.cafe_name || 'Cafe 67'}. {t('allRightsReserved')}
         </p>
           </div>
           
@@ -1060,7 +1484,7 @@ function App() {
   const renderMenuSections = () => (
     <div className="page-sections menu-page-sections">
       <section className="section-shell menu-shop-shell">
-        <div className="shop-grid" aria-label="Shop menu">
+        <div className="shop-grid" aria-label={t('shopMenu')}>
           {isCatalogLoading
             ? Array.from({ length: 6 }).map((_, index) => (
               <article className="shop-card skeleton-card" key={`skeleton-${index}`} aria-hidden="true">
@@ -1081,17 +1505,17 @@ function App() {
                 alt={product.name}
               />
               <div>
-                <span>{product.category?.name || 'Drink'}</span>
+                <span>{product.category?.name || t('drink')}</span>
                 <h3>{product.name}</h3>
                 <p>{product.description}</p>
                 <div className="shop-card-footer">
-                  <strong>{money(product.price)}</strong>
+                  <strong>{money(product.price, locale)}</strong>
                   <button
                     type="button"
                     disabled={soldOut || !product.is_available}
                     onClick={() => addToCart(product)}
                   >
-                    Add to cart
+                    {t('addToCart')}
                   </button>
                 </div>
               </div>
@@ -1099,7 +1523,7 @@ function App() {
           ))}
         </div>
         {!isCatalogLoading && products.length === 0 ? (
-          <p className="empty-menu-copy">No drinks are available yet.</p>
+          <p className="empty-menu-copy">{t('noProductsYet')}</p>
         ) : null}
       </section>
     </div>
@@ -1109,32 +1533,35 @@ function App() {
     <div className="page-sections">
       <section className="section-card-grid">
         <article>
-          <strong>Small daily limit</strong>
-          <span>67 cups keeps the experience controlled, fast, and fresh.</span>
+          <strong>{isArabic ? 'حد يومي صغير' : 'Small daily limit'}</strong>
+          <span>{isArabic ? 'عدد 67 كوب يخلي التجربة مرتبة وسريعة وطازجة.' : '67 cups keeps the experience controlled, fast, and fresh.'}</span>
         </article>
         <article>
-          <strong>Premium workflow</strong>
+          <strong>{isArabic ? 'تشغيل احترافي' : 'Premium workflow'}</strong>
           <span>
-            Products, orders, banners, and daily limits stay synced with the Laravel
-            backend.
+            {isArabic
+              ? 'المنتجات والطلبات والبنر والحد اليومي كلها متزامنة مع نظام Laravel الخلفي.'
+              : 'Products, orders, banners, and daily limits stay synced with the Laravel backend.'}
           </span>
         </article>
         <article>
-          <strong>Warm hospitality</strong>
+          <strong>{isArabic ? 'ضيافة دافئة' : 'Warm hospitality'}</strong>
           <span>
-            Designed to feel intentional, premium, and easy to order from mobile or
-            desktop.
+            {isArabic
+              ? 'التصميم مقصود وفخم وسهل للطلب سواء من الجوال أو الكمبيوتر.'
+              : 'Designed to feel intentional, premium, and easy to order from mobile or desktop.'}
           </span>
         </article>
       </section>
       <section className="wide-story-card">
         <div>
-          <p>Why it works</p>
-          <h2>Every order respects the daily service limit</h2>
+          <p>{isArabic ? 'ليش يضبط؟' : 'Why it works'}</p>
+          <h2>{isArabic ? 'كل طلب يلتزم بالحد اليومي للخدمة' : 'Every order respects the daily service limit'}</h2>
         </div>
         <span>
-          The storefront keeps the customer experience focused, while the menu,
-          checkout, and account flows stay directly connected to the Laravel backend.
+          {isArabic
+            ? 'واجهة الطلب تحافظ على تجربة مركزة للعميل، مع ربط مباشر بين المنيو وإتمام الطلب والحساب ونظام Laravel.'
+            : 'The storefront keeps the customer experience focused, while the menu, checkout, and account flows stay directly connected to the Laravel backend.'}
         </span>
       </section>
     </div>
@@ -1144,15 +1571,15 @@ function App() {
     <div className="page-sections">
       <section className="section-card-grid">
         <article>
-          <strong>Phone</strong>
+          <strong>{t('phone')}</strong>
           <span>{settings.phone || '+1 555 670 067'}</span>
         </article>
         <article>
-          <strong>WhatsApp</strong>
+          <strong>{isArabic ? 'واتساب' : 'WhatsApp'}</strong>
           <span>{settings.whatsapp || '+1 555 670 067'}</span>
         </article>
         <article>
-          <strong>Hours</strong>
+          <strong>{isArabic ? 'الساعات' : 'Hours'}</strong>
           <span>
             {shortTime(settings.opens_at)} - {shortTime(settings.closes_at || '21:00')}
           </span>
@@ -1160,12 +1587,13 @@ function App() {
       </section>
       <section className="wide-story-card contact-story-card">
         <div>
-          <p>Need help?</p>
-          <h2>Order support without friction</h2>
+          <p>{isArabic ? 'تحتاج مساعدة؟' : 'Need help?'}</p>
+          <h2>{isArabic ? 'دعم الطلبات بسهولة' : 'Order support without friction'}</h2>
         </div>
         <span>
-          Contact the cafe team for address clarification, daily availability, or
-          special ordering requests before the cup limit closes for the day.
+          {isArabic
+            ? 'تواصل مع فريق الكافيه لتأكيد العنوان أو معرفة توفر اليوم أو الطلبات الخاصة قبل ما يوصل حد اليوم.'
+            : 'Contact the cafe team for address clarification, daily availability, or special ordering requests before the cup limit closes for the day.'}
         </span>
       </section>
     </div>
@@ -1175,17 +1603,17 @@ function App() {
     <div className="page-sections checkout-sections">
       <section className="checkout-items-panel">
         <div className="section-heading left">
-          <p>Cart items</p>
-          <h2>Review your drinks</h2>
+          <p>{t('cartItems')}</p>
+          <h2>{t('reviewDrinks')}</h2>
         </div>
         {cartItems.length === 0 ? (
-          <p className="muted-copy">No items added yet. Start from the menu page.</p>
+          <p className="muted-copy">{t('noItemsStartFromMenu')}</p>
         ) : (
           cartItems.map((item) => (
             <article className="checkout-line" key={item.product_id}>
               <div>
                 <strong>{item.product.name}</strong>
-                <span>{money(item.product.price)} each</span>
+                <span>{money(item.product.price, locale)} {t('each')}</span>
               </div>
               <div className="quantity-controls">
                 <button
@@ -1209,18 +1637,18 @@ function App() {
           ))
         )}
         <div className="checkout-summary-bar">
-          <span>{cartCups} cups</span>
-          <strong>{money(cartTotal)}</strong>
+          <span>{cartCups} {t('cups')}</span>
+          <strong>{money(cartTotal, locale)}</strong>
         </div>
       </section>
 
       <form className="checkout-form" onSubmit={submitOrder}>
         <div className="section-heading left">
-          <p>Delivery details</p>
-          <h2>Delivery information</h2>
+          <p>{t('deliveryDetails')}</p>
+          <h2>{t('deliveryInformation')}</h2>
         </div>
         <label>
-          Full name
+          {t('fullName')}
           <input
             required
             value={checkoutForm.customer_name}
@@ -1230,7 +1658,7 @@ function App() {
           />
         </label>
         <label>
-          Phone number
+          {t('phoneNumber')}
           <PhoneInput
             country="ae"
             countryCodeEditable
@@ -1250,10 +1678,10 @@ function App() {
           />
         </label>
         {!isCheckoutPhoneValid && checkoutForm.customer_phone ? (
-          <p className="field-hint error">Enter a valid phone number with country code.</p>
+          <p className="field-hint error">{t('enterValidPhone')}</p>
         ) : null}
         <label>
-          Car number
+          {t('carNumber')}
           <input
             required
             value={checkoutForm.car_number}
@@ -1263,7 +1691,7 @@ function App() {
           />
         </label>
         <label>
-          Notes
+          {t('notes')}
           <textarea
             value={checkoutForm.customer_notes}
             onChange={(event) =>
@@ -1272,7 +1700,7 @@ function App() {
           />
         </label>
         <button type="submit" disabled={cartItems.length === 0 || soldOut || !isCheckoutPhoneValid}>
-          Place order
+          {t('placeOrder')}
         </button>
       </form>
     </div>
@@ -1282,23 +1710,29 @@ function App() {
     const tiles = [
       {
         key: 'orders',
-        title: 'Orders',
-        description: orders.length > 0 ? `${orders.length} recent orders` : 'Track your latest cafe orders',
+        title: isArabic ? 'الطلبات' : 'Orders',
+        description: orders.length > 0
+          ? (isArabic ? `${orders.length} طلبات حديثة` : `${orders.length} recent orders`)
+          : (isArabic ? 'تابع آخر طلباتك من الكافيه' : 'Track your latest cafe orders'),
       },
       {
         key: 'addresses',
-        title: 'Addresses',
-        description: `${userAddresses.length} saved address${userAddresses.length === 1 ? '' : 'es'}`,
+        title: isArabic ? 'العناوين' : 'Addresses',
+        description: isArabic
+          ? `${userAddresses.length} عنوان محفوظ`
+          : `${userAddresses.length} saved address${userAddresses.length === 1 ? '' : 'es'}`,
       },
       {
         key: 'details',
-        title: 'Account details',
-        description: 'Edit your profile name and main phone number',
+        title: isArabic ? 'تفاصيل الحساب' : 'Account details',
+        description: isArabic
+          ? 'عدّل اسمك ورقم الجوال الأساسي'
+          : 'Edit your profile name and main phone number',
       },
       {
         key: 'logout',
-        title: 'Logout',
-        description: 'Sign out from your Cafe 67 account',
+        title: isArabic ? 'تسجيل خروج' : 'Logout',
+        description: isArabic ? 'تسجيل الخروج من حساب Cafe 67' : 'Sign out from your Cafe 67 account',
       },
     ]
 
@@ -1323,13 +1757,13 @@ function App() {
     <form className="account-form account-dashboard-form" onSubmit={updateProfile}>
       <div className="account-dashboard-section-header">
         <div>
-          <p>Account details</p>
-          <h3>Edit your main profile details</h3>
+          <p>{isArabic ? 'تفاصيل الحساب' : 'Account details'}</p>
+          <h3>{isArabic ? 'عدّل بيانات ملفك الأساسي' : 'Edit your main profile details'}</h3>
         </div>
       </div>
       <div className="profile-details-grid">
         <label>
-          Name
+          {t('name')}
           <input
             required
             value={profileForm.name}
@@ -1339,7 +1773,7 @@ function App() {
           />
         </label>
         <label>
-          Account phone
+          {isArabic ? 'جوال الحساب' : 'Account phone'}
           <input
             value={profileForm.phone}
             onChange={(event) =>
@@ -1349,7 +1783,7 @@ function App() {
         </label>
       </div>
       <div className="account-actions-row">
-        <button type="submit">Save account details</button>
+        <button type="submit">{isArabic ? 'حفظ تفاصيل الحساب' : 'Save account details'}</button>
       </div>
     </form>
   )
@@ -1358,11 +1792,11 @@ function App() {
     <form className="account-form account-dashboard-form" onSubmit={updateProfile}>
       <div className="address-manager-header account-dashboard-section-header">
         <div>
-          <p>Addresses</p>
-          <strong>{userAddresses.length} saved address{userAddresses.length === 1 ? '' : 'es'}</strong>
+          <p>{isArabic ? 'العناوين' : 'Addresses'}</p>
+          <strong>{isArabic ? `${userAddresses.length} عنوان محفوظ` : `${userAddresses.length} saved address${userAddresses.length === 1 ? '' : 'es'}`}</strong>
         </div>
         <button type="button" className="ghost-button compact" onClick={addAddress}>
-          Add address
+          {isArabic ? 'إضافة عنوان' : 'Add address'}
         </button>
       </div>
 
@@ -1370,23 +1804,23 @@ function App() {
         {userAddresses.map((address, index) => (
           <article className="address-edit-card" key={address.id || `address-${index}`}>
             <div className="address-edit-card-header">
-              <strong>Address {index + 1}</strong>
+              <strong>{isArabic ? `العنوان ${index + 1}` : `Address ${index + 1}`}</strong>
               <div>
                 <button
                   type="button"
                   className={address.is_default ? 'address-pill active' : 'address-pill'}
                   onClick={() => setDefaultAddress(index)}
                 >
-                  {address.is_default ? 'Default' : 'Set default'}
+                  {address.is_default ? (isArabic ? 'افتراضي' : 'Default') : (isArabic ? 'تعيين كافتراضي' : 'Set default')}
                 </button>
                 <button type="button" className="address-remove" onClick={() => removeAddress(index)}>
-                  Remove
+                  {isArabic ? 'حذف' : 'Remove'}
                 </button>
               </div>
             </div>
             <div className="address-fields-grid">
               <label>
-                Phone
+                {t('phone')}
                 <input
                   required
                   value={address.phone}
@@ -1394,7 +1828,7 @@ function App() {
                 />
               </label>
               <label>
-                Town / City
+                {t('townCity')}
                 <input
                   required
                   value={address.town_city}
@@ -1402,7 +1836,7 @@ function App() {
                 />
               </label>
               <label>
-                Address
+                {t('address')}
                 <textarea
                   required
                   value={address.address}
@@ -1410,7 +1844,7 @@ function App() {
                 />
               </label>
               <label>
-                Villa No. / Floor No.
+                {t('villaFloor')}
                 <input
                   required
                   value={address.villa_floor}
@@ -1422,7 +1856,7 @@ function App() {
         ))}
       </div>
       <div className="account-actions-row">
-        <button type="submit">Save addresses</button>
+        <button type="submit">{isArabic ? 'حفظ العناوين' : 'Save addresses'}</button>
       </div>
     </form>
   )
@@ -1431,13 +1865,13 @@ function App() {
     <section className="account-dashboard-block orders-dashboard-block">
       <div className="account-dashboard-section-header">
         <div>
-          <p>Orders</p>
-          <h3>Recent customer orders</h3>
+          <p>{isArabic ? 'الطلبات' : 'Orders'}</p>
+          <h3>{isArabic ? 'طلبات العميل الأخيرة' : 'Recent customer orders'}</h3>
         </div>
       </div>
       {orders.length === 0 ? (
         <p className="muted-copy">
-          No orders yet. Shop the menu to place your first order.
+          {isArabic ? 'ما فيه طلبات للحين. اطلب من المنيو أول طلب لك.' : 'No orders yet. Shop the menu to place your first order.'}
         </p>
       ) : null}
       {orders.map((order) => (
@@ -1445,7 +1879,7 @@ function App() {
           <div>
             <strong>{order.order_number}</strong>
             <span>
-              {order.items.length} lines · {money(order.total)}
+              {order.items.length} {isArabic ? 'عناصر' : 'lines'} · {money(order.total, locale)}
             </span>
           </div>
           <em>{order.status.replaceAll('_', ' ')}</em>
@@ -1457,10 +1891,11 @@ function App() {
   const renderDashboardView = () => (
     <section className="account-dashboard-block account-dashboard-home">
       <div className="account-dashboard-welcome">
-        <p>Hello <strong>{user?.name || settings.cafe_name || 'Cafe 67'}</strong></p>
+        <p>{isArabic ? 'هلا' : 'Hello'} <strong>{user?.name || settings.cafe_name || 'Cafe 67'}</strong></p>
         <span>
-          From your account dashboard you can view your recent orders, manage your saved addresses,
-          and edit your account details.
+          {isArabic
+            ? 'من لوحة الحساب تقدر تشوف طلباتك الأخيرة، تدير عناوينك المحفوظة، وتعدّل تفاصيل حسابك.'
+            : 'From your account dashboard you can view your recent orders, manage your saved addresses, and edit your account details.'}
         </span>
       </div>
       {renderDashboardTiles()}
@@ -1492,7 +1927,7 @@ function App() {
               <div className="account-avatar">{(user.name || 'C').slice(0, 1).toUpperCase()}</div>
               <div>
                 <strong>{user.name}</strong>
-                <span>Customer #{String(user.id || '').padStart(4, '0')}</span>
+                <span>{isArabic ? 'عميل' : 'Customer'} #{String(user.id || '').padStart(4, '0')}</span>
               </div>
             </div>
 
@@ -1502,30 +1937,30 @@ function App() {
                 className={accountView === 'dashboard' ? 'active' : ''}
                 onClick={() => setAccountView('dashboard')}
               >
-                Dashboard
+                {isArabic ? 'لوحة التحكم' : 'Dashboard'}
               </button>
               <button
                 type="button"
                 className={accountView === 'orders' ? 'active' : ''}
                 onClick={() => setAccountView('orders')}
               >
-                Orders
+                {isArabic ? 'الطلبات' : 'Orders'}
               </button>
               <button
                 type="button"
                 className={accountView === 'addresses' ? 'active' : ''}
                 onClick={() => setAccountView('addresses')}
               >
-                Addresses
+                {isArabic ? 'العناوين' : 'Addresses'}
               </button>
               <button
                 type="button"
                 className={accountView === 'details' ? 'active' : ''}
                 onClick={() => setAccountView('details')}
               >
-                Account details
+                {isArabic ? 'تفاصيل الحساب' : 'Account details'}
               </button>
-              <button type="button" onClick={logout}>Logout</button>
+              <button type="button" onClick={logout}>{isArabic ? 'تسجيل خروج' : 'Logout'}</button>
             </div>
           </aside>
 
@@ -1536,33 +1971,33 @@ function App() {
       ) : (
         <section className="account-auth-layout">
           <article className="account-auth-intro">
-            <p className="account-auth-kicker">Member Access</p>
+            <p className="account-auth-kicker">{t('memberAccess')}</p>
             <h2 className="account-auth-title">
-              Welcome Back to <span>{settings.cafe_name || 'Cafe 67'}</span>
+              {t('welcomeBackTo')} <span>{settings.cafe_name || 'Cafe 67'}</span>
             </h2>
             <p className="account-auth-copy">
-              Sign in to access your account, manage orders, and update your delivery details.
+              {t('signInHelp')}
             </p>
             <ul className="account-benefits">
-              <li>Track your recent orders with live status.</li>
-              <li>Save your address and speed up checkout.</li>
-              <li>Recover your password from the same form.</li>
+              <li>{t('benefitOne')}</li>
+              <li>{t('benefitTwo')}</li>
+              <li>{t('benefitThree')}</li>
             </ul>
           </article>
 
           <section className="account-auth-card">
             <div className="account-auth-header">
               <h3>
-                {authMode === 'login' ? 'Sign In' : null}
-                {authMode === 'register' ? 'Create Account' : null}
-                {authMode === 'forgot' ? 'Forgot Password' : null}
-                {authMode === 'reset' ? 'Reset Password' : null}
+                {authMode === 'login' ? t('signIn') : null}
+                {authMode === 'register' ? t('createAccount') : null}
+                {authMode === 'forgot' ? t('forgotPassword') : null}
+                {authMode === 'reset' ? t('resetPassword') : null}
               </h3>
               <p>
-                {authMode === 'login' ? 'Use your account credentials to continue.' : null}
-                {authMode === 'register' ? 'Set up your account details to get started.' : null}
-                {authMode === 'forgot' ? 'Enter your email to receive a 6-digit OTP.' : null}
-                {authMode === 'reset' ? 'Enter the OTP from your email and choose your new password.' : null}
+                {authMode === 'login' ? t('loginHelp') : null}
+                {authMode === 'register' ? t('registerHelp') : null}
+                {authMode === 'forgot' ? t('forgotHelp') : null}
+                {authMode === 'reset' ? t('resetHelp') : null}
               </p>
             </div>
 
@@ -1571,7 +2006,7 @@ function App() {
                 {authMode === 'register' ? (
                   <>
                     <label>
-                      Name
+                      {t('name')}
                       <input
                         required
                         value={authForm.name}
@@ -1581,7 +2016,7 @@ function App() {
                       />
                     </label>
                     <label>
-                      Phone
+                      {t('phone')}
                       <input
                         value={authForm.phone}
                         onChange={(event) =>
@@ -1590,7 +2025,7 @@ function App() {
                       />
                     </label>
                     <label>
-                      Town / City
+                      {t('townCity')}
                       <input
                         value={authForm.town_city}
                         onChange={(event) =>
@@ -1599,7 +2034,7 @@ function App() {
                       />
                     </label>
                     <label>
-                      Address
+                      {t('address')}
                       <textarea
                         value={authForm.address}
                         onChange={(event) =>
@@ -1608,7 +2043,7 @@ function App() {
                       />
                     </label>
                     <label>
-                      Villa No. / Floor No.
+                      {t('villaFloor')}
                       <input
                         value={authForm.villa_floor}
                         onChange={(event) =>
@@ -1619,7 +2054,7 @@ function App() {
                   </>
                 ) : null}
                 <label>
-                  Email
+                  {t('email')}
                   <input
                     required
                     type="email"
@@ -1631,12 +2066,12 @@ function App() {
                   />
                 </label>
                 <label>
-                  Password
+                  {t('password')}
                   <input
                     required
                     type="password"
                     minLength={8}
-                    placeholder="Enter your password"
+                    placeholder={t('enterPassword')}
                     value={authForm.password}
                     onChange={(event) =>
                       setAuthForm({ ...authForm, password: event.target.value })
@@ -1647,23 +2082,23 @@ function App() {
                 <div className="account-links-row">
                   {authMode === 'login' ? (
                     <button type="button" className="account-link-action" onClick={() => setAuthMode('forgot')}>
-                      Forgot password?
+                      {t('forgotPasswordQ')}
                     </button>
                   ) : null}
                   {authMode === 'login' ? (
                     <button type="button" className="account-link-action" onClick={() => setAuthMode('register')}>
-                      Create account
+                      {t('createAccountQ')}
                     </button>
                   ) : null}
                   {authMode === 'register' ? (
                     <button type="button" className="account-link-action" onClick={() => setAuthMode('login')}>
-                      Back to sign in
+                      {t('backToSignIn')}
                     </button>
                   ) : null}
                 </div>
 
                 <button type="submit">
-                  {authMode === 'register' ? 'Create Account' : 'Login'}
+                  {authMode === 'register' ? t('createAccount') : t('login')}
                 </button>
               </form>
             )}
@@ -1671,7 +2106,7 @@ function App() {
             {authMode === 'forgot' ? (
               <form className="account-auth-form" onSubmit={sendResetLink}>
                 <label>
-                  Email
+                  {t('email')}
                   <input
                     required
                     type="email"
@@ -1683,18 +2118,18 @@ function App() {
 
                 <div className="account-links-row">
                   <button type="button" className="account-link-action" onClick={() => setAuthMode('login')}>
-                    Back to sign in
+                    {t('backToSignIn')}
                   </button>
                 </div>
 
-                <button type="submit">Send OTP</button>
+                <button type="submit">{t('sendOtp')}</button>
               </form>
             ) : null}
 
             {authMode === 'reset' ? (
               <form className="account-auth-form" onSubmit={resetPassword}>
                 <label>
-                  Email
+                  {t('email')}
                   <input
                     required
                     type="email"
@@ -1705,12 +2140,12 @@ function App() {
                   />
                 </label>
                 <label>
-                  OTP code
+                  {t('otpCode')}
                   <input
                     required
                     inputMode="numeric"
                     maxLength={6}
-                    placeholder="Enter 6-digit OTP"
+                    placeholder={t('otpPlaceholder')}
                     value={resetForm.otp}
                     onChange={(event) =>
                       setResetForm({ ...resetForm, otp: event.target.value.replace(/\D/g, '').slice(0, 6) })
@@ -1718,7 +2153,7 @@ function App() {
                   />
                 </label>
                 <label>
-                  New password
+                  {t('newPassword')}
                   <input
                     required
                     type="password"
@@ -1730,7 +2165,7 @@ function App() {
                   />
                 </label>
                 <label>
-                  Confirm password
+                  {t('confirmPassword')}
                   <input
                     required
                     type="password"
@@ -1747,7 +2182,7 @@ function App() {
 
                 <div className="account-links-row">
                   <button type="button" className="account-link-action" onClick={() => setAuthMode('login')}>
-                    Back to sign in
+                    {t('backToSignIn')}
                   </button>
                   <button
                     type="button"
@@ -1755,11 +2190,11 @@ function App() {
                     disabled={!canResendOtp}
                     onClick={resendOtp}
                   >
-                    {canResendOtp ? 'Resend OTP' : `Resend in ${resendRemainingSeconds}s`}
+                    {canResendOtp ? t('resendOtp') : `${t('resendIn')} ${resendRemainingSeconds}s`}
                   </button>
                 </div>
 
-                <button type="submit">Reset Password</button>
+                <button type="submit">{t('resetPassword')}</button>
               </form>
             ) : null}
 
@@ -1769,7 +2204,7 @@ function App() {
                 className="account-link-action standalone"
                 onClick={() => setAuthMode('reset')}
               >
-                Already have an OTP code?
+                {t('alreadyHaveOtp')}
               </button>
             ) : null}
           </section>
@@ -1810,7 +2245,7 @@ function App() {
                   <img src={brandLogo} alt={settings.cafe_name || 'Cafe 67'} />
                 </a>
 
-                <nav aria-label="Main navigation">
+                <nav aria-label={t('mainNavigation')}>
                   {navPages.map((page) => (
                     <a
                       key={page.path}
@@ -1825,13 +2260,22 @@ function App() {
 
                 <div className="nav-actions">
                   <button
+                    className="icon-link"
+                    type="button"
+                    onClick={() => setLanguage((current) => (current === 'en' ? 'ar' : 'en'))}
+                    aria-label={isArabic ? 'Switch to English' : 'التحويل للعربية'}
+                    title={isArabic ? 'Switch to English' : 'التحويل للعربية'}
+                  >
+                    {isArabic ? 'EN' : 'AR'}
+                  </button>
+                  <button
                     className="menu-button"
                     type="button"
                     onClick={() => {
                       setMobileMenuOpen(true)
                       setCartOpen(false)
                     }}
-                    aria-label="Open menu"
+                    aria-label={t('openMenu')}
                   >
                     <Menu size={18} />
                   </button>
@@ -1842,7 +2286,7 @@ function App() {
                       setCartOpen(true)
                       setMobileMenuOpen(false)
                     }}
-                    aria-label="Open cart"
+                    aria-label={t('openCart')}
                   >
                     <ShoppingBag size={18} />
                     <span>{cartCups}</span>
@@ -1874,7 +2318,7 @@ function App() {
   }
 
   return (
-    <main className={`site-shell route-${activePage.path === '/' ? 'home' : activePage.path.slice(1).replaceAll('/', '-')}`}>
+    <main className={`site-shell route-${activePage.path === '/' ? 'home' : activePage.path.slice(1).replaceAll('/', '-')}`} dir={isArabic ? 'rtl' : 'ltr'}>
       {activePage.path !== '/' ? (
         <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
           <a
@@ -1886,7 +2330,7 @@ function App() {
             <img src={brandLogo} alt={settings.cafe_name || 'Cafe 67'} />
           </a>
 
-          <nav aria-label="Main navigation">
+          <nav aria-label={t('mainNavigation')}>
             {navPages.map((page) => (
               <a
                 key={page.path}
@@ -1901,13 +2345,22 @@ function App() {
 
           <div className="nav-actions">
             <button
+              className="icon-link"
+              type="button"
+              onClick={() => setLanguage((current) => (current === 'en' ? 'ar' : 'en'))}
+              aria-label={isArabic ? 'Switch to English' : 'التحويل للعربية'}
+              title={isArabic ? 'Switch to English' : 'التحويل للعربية'}
+            >
+              {isArabic ? 'EN' : 'AR'}
+            </button>
+            <button
               className="menu-button"
               type="button"
               onClick={() => {
                 setMobileMenuOpen(true)
                 setCartOpen(false)
               }}
-              aria-label="Open menu"
+              aria-label={t('openMenu')}
             >
               <Menu size={18} />
             </button>
@@ -1918,7 +2371,7 @@ function App() {
                 setCartOpen(true)
                 setMobileMenuOpen(false)
               }}
-              aria-label="Open cart"
+              aria-label={t('openCart')}
             >
               <ShoppingBag size={18} />
               <span>{cartCups}</span>
@@ -1930,10 +2383,10 @@ function App() {
       {notice ? (
         <div className="notice" role="status" aria-live="polite">
           <div className="notice-body">
-            <strong>Notification</strong>
+            <strong>{t('notification')}</strong>
             <span>{notice}</span>
           </div>
-          <button className="notice-dismiss" type="button" onClick={() => setNotice('')} aria-label="Dismiss notification">
+          <button className="notice-dismiss" type="button" onClick={() => setNotice('')} aria-label={t('dismissNotification')}>
             <X size={16} />
           </button>
         </div>
@@ -1953,32 +2406,34 @@ function App() {
         cartCups={cartCups}
         cartTotal={cartTotal}
         soldOut={soldOut}
-        money={money}
+        money={(value) => money(value, locale)}
         addToCart={addToCart}
         setQuantity={setQuantity}
         checkoutForm={checkoutForm}
         setCheckoutForm={setCheckoutForm}
         isCheckoutPhoneValid={isCheckoutPhoneValid}
+        loyaltyState={loyaltyState}
         userAddresses={userAddresses}
         selectedCheckoutAddressId={selectedCheckoutAddressId}
         applyCheckoutAddress={applyCheckoutAddress}
         onSubmitOrder={submitOrder}
+        language={language}
       />
-      <aside className={`cart-drawer ${cartOpen ? 'open' : ''}`} aria-label="Shopping cart">
+      <aside className={`cart-drawer ${cartOpen ? 'open' : ''}`} aria-label={isArabic ? 'سلة التسوق' : 'Shopping cart'}>
         <div className="cart-drawer-header">
-          <strong>Your Cart</strong>
-          <button type="button" onClick={() => setCartOpen(false)} aria-label="Close cart">
+          <strong>{t('yourCart')}</strong>
+          <button type="button" onClick={() => setCartOpen(false)} aria-label={t('closeCart')}>
             <X size={18} />
           </button>
         </div>
         {cartItems.length === 0 ? (
-          <p className="empty-cart">No drinks added yet.</p>
+          <p className="empty-cart">{t('noDrinksYet')}</p>
         ) : (
           cartItems.map((item) => (
             <article className="cart-line" key={item.product_id}>
               <div>
                 <strong>{item.product.name}</strong>
-                <span>{money(item.product.price)} each</span>
+                <span>{money(item.product.price, locale)} {t('each')}</span>
               </div>
               <div className="quantity-controls">
                 <button
@@ -2002,8 +2457,8 @@ function App() {
           ))
         )}
         <div className="cart-total">
-          <span>{cartCups} cups</span>
-          <strong>{money(cartTotal)}</strong>
+          <span>{cartCups} {t('cups')}</span>
+          <strong>{money(cartTotal, locale)}</strong>
         </div>
         <button
           className="checkout-link"
@@ -2011,19 +2466,19 @@ function App() {
           disabled={cartItems.length === 0}
           onClick={() => openPage('/checkout')}
         >
-          Go to checkout
+          {t('goToCheckout')}
         </button>
       </aside>
 
-      <aside className={`cart-drawer mobile-menu-drawer ${mobileMenuOpen ? 'open' : ''}`} aria-label="Mobile menu">
+      <aside className={`cart-drawer mobile-menu-drawer ${mobileMenuOpen ? 'open' : ''}`} aria-label={t('mobileMenu')}>
         <div className="cart-drawer-header">
-          <strong>Menu</strong>
-          <button type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">
+          <strong>{t('menu')}</strong>
+          <button type="button" onClick={() => setMobileMenuOpen(false)} aria-label={t('closeMenu')}>
             <X size={18} />
           </button>
         </div>
 
-        <nav className="mobile-menu-links" aria-label="Mobile navigation">
+        <nav className="mobile-menu-links" aria-label={t('mobileNavigation')}>
           {navPages.map((page) => (
             <a
               key={page.path}

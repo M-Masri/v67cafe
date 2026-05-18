@@ -4,6 +4,94 @@ import ReactPhoneInput from 'react-phone-input-2'
 
 const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
 
+const modalTranslations = {
+  en: {
+    orderNow: 'Order now',
+    buildOrder: 'Build your order in 3 steps',
+    closePopup: 'Close order popup',
+    orderSteps: 'Order steps',
+    products: 'Products',
+    checkout: 'Checkout',
+    payment: 'Payment',
+    selectProducts: 'Select products',
+    chooseFromMenu: 'Choose from the current menu',
+    cups: 'cups',
+    drink: 'Drink',
+    decrease: 'Decrease',
+    increase: 'Increase',
+    remove: 'Remove',
+    add: 'Add',
+    unavailable: 'Unavailable',
+    checkoutDetails: 'Checkout details',
+    setDetails: 'Set your details',
+    savedAddresses: 'Saved addresses',
+    address: 'Address',
+    carBrand: 'Car brand',
+    selectCarBrand: 'Select car brand',
+    searchBrand: 'Search brand',
+    carNumber: 'Car number',
+    phoneNumber: 'Phone number',
+    validPhone: 'Enter a valid phone number with country code.',
+    checkingLoyalty: 'Checking loyalty status...',
+    useReward: 'Use free cup reward ({count} available)',
+    freeCupsToUse: 'Free cups to use',
+    paymentWiring: 'Payment wiring comes next',
+    paymentPlaceholder: 'Payment component placeholder',
+    paymentPlaceholderBody: 'This step is ready in the popup flow. We can connect card, Apple Pay, or any gateway here in the next pass.',
+    totalCups: 'Total cups',
+    totalAmount: 'Total amount',
+    back: 'Back',
+    continueCheckout: 'Continue to checkout',
+    continuePayment: 'Continue to payment',
+    placeOrder: 'Place order',
+  },
+  ar: {
+    orderNow: 'اطلب الحين',
+    buildOrder: 'كوّن طلبك في 3 خطوات',
+    closePopup: 'إغلاق نافذة الطلب',
+    orderSteps: 'خطوات الطلب',
+    products: 'المنتجات',
+    checkout: 'البيانات',
+    payment: 'الدفع',
+    selectProducts: 'اختر المنتجات',
+    chooseFromMenu: 'اختر من المنيو الحالي',
+    cups: 'كوب',
+    drink: 'مشروب',
+    decrease: 'تقليل',
+    increase: 'زيادة',
+    remove: 'حذف',
+    add: 'إضافة',
+    unavailable: 'غير متوفر',
+    checkoutDetails: 'تفاصيل الطلب',
+    setDetails: 'حدد بياناتك',
+    savedAddresses: 'العناوين المحفوظة',
+    address: 'عنوان',
+    carBrand: 'ماركة السيارة',
+    selectCarBrand: 'اختر ماركة السيارة',
+    searchBrand: 'ابحث عن الماركة',
+    carNumber: 'رقم السيارة',
+    phoneNumber: 'رقم الجوال',
+    validPhone: 'اكتب رقم جوال صحيح مع مفتاح الدولة.',
+    checkingLoyalty: 'جاري التحقق من الولاء...',
+    useReward: 'استخدم مكافأة كوب مجاني ({count} متاح)',
+    freeCupsToUse: 'عدد الأكواب المجانية',
+    paymentWiring: 'خطوة الدفع تكون هنا',
+    paymentPlaceholder: 'مكان مخصص لمكون الدفع',
+    paymentPlaceholderBody: 'الخطوة جاهزة داخل النافذة. نقدر نربط البطاقة أو Apple Pay أو أي بوابة دفع في المرحلة الجاية.',
+    totalCups: 'إجمالي الأكواب',
+    totalAmount: 'الإجمالي',
+    back: 'رجوع',
+    continueCheckout: 'اكمل للبيانات',
+    continuePayment: 'اكمل للدفع',
+    placeOrder: 'تأكيد الطلب',
+  },
+}
+
+function getModalText(language, key) {
+  const selected = modalTranslations[language] || modalTranslations.en
+  return selected[key] || modalTranslations.en[key] || key
+}
+
 const carBrands = [
   { name: 'Abarth', logo: 'https://logo.clearbit.com/abarth.com' },
   { name: 'Acura', logo: 'https://logo.clearbit.com/acura.com' },
@@ -189,10 +277,12 @@ function OrderNowModal({
   setQuantity,
   checkoutForm,
   setCheckoutForm,
+  loyaltyState,
   userAddresses,
   selectedCheckoutAddressId,
   applyCheckoutAddress,
   onSubmitOrder,
+  language = 'en',
 }) {
   const [step, setStep] = useState(initialStep)
   const [brandMenuOpen, setBrandMenuOpen] = useState(false)
@@ -237,10 +327,12 @@ function OrderNowModal({
   )
   const isCheckoutPhoneValid = isValidInternationalPhone(checkoutForm.customer_phone)
   const canContinueFromProducts = cartCups > 0 && !soldOut
-  const canContinueFromCheckout = Boolean(checkoutForm.car_type)
-    && Boolean(checkoutForm.car_number.trim())
-    && isCheckoutPhoneValid
-  const stepLabels = ['Products', 'Checkout', 'Payment']
+  const canContinueFromCheckout = isCheckoutPhoneValid
+  const loyaltyData = loyaltyState?.data
+  const hasFreeReward = Boolean(loyaltyData?.has_free_reward)
+  const freeCupsAvailable = Number(loyaltyData?.free_cups_available || 0)
+  const t = (key) => getModalText(language, key)
+  const stepLabels = [t('products'), t('checkout'), t('payment')]
   const selectedBrand = useMemo(
     () => carBrands.find((brand) => brand.name === checkoutForm.car_type),
     [checkoutForm.car_type],
@@ -307,7 +399,7 @@ function OrderNowModal({
     const carNumber = checkoutForm.car_number?.trim() || ''
     const customerPhone = checkoutForm.customer_phone?.trim() || ''
 
-    if (!carType || !carNumber || !customerPhone) {
+    if (!customerPhone) {
       return
     }
 
@@ -333,15 +425,15 @@ function OrderNowModal({
       >
         <header className="order-modal-header">
           <div>
-            <p className="order-modal-kicker">Order now</p>
-            <h2 id="order-modal-title">Build your order in 3 steps</h2>
+            <p className="order-modal-kicker">{t('orderNow')}</p>
+            <h2 id="order-modal-title">{t('buildOrder')}</h2>
           </div>
-          <button type="button" className="order-modal-close" onClick={onClose} aria-label="Close order popup">
+          <button type="button" className="order-modal-close" onClick={onClose} aria-label={t('closePopup')}>
             <X size={18} />
           </button>
         </header>
 
-        <div className="order-modal-steps" aria-label="Order steps">
+        <div className="order-modal-steps" aria-label={t('orderSteps')}>
           {stepLabels.map((label, index) => (
             <div key={label} className={`order-step-pill ${step === index + 1 ? 'active' : ''} ${step > index + 1 ? 'done' : ''}`}>
               <div className="order-step-line" aria-hidden="true" />
@@ -356,11 +448,11 @@ function OrderNowModal({
             <div className="order-modal-panel">
               <div className="order-modal-section-heading">
                 <div>
-                  <p>Select products</p>
-                  <h3>Choose from the current menu</h3>
+                  <p>{t('selectProducts')}</p>
+                  <h3>{t('chooseFromMenu')}</h3>
                 </div>
                 <div className="order-modal-summary-chip">
-                  <span>{cartCups} cups</span>
+                  <span>{cartCups} {t('cups')}</span>
                   <strong>{money(cartTotal)}</strong>
                 </div>
               </div>
@@ -377,7 +469,7 @@ function OrderNowModal({
                         alt={product.name}
                       />
                       <div className="order-product-copy">
-                        <span>{product.category?.name || 'Drink'}</span>
+                        <span>{product.category?.name || t('drink')}</span>
                         <strong>{product.name}</strong>
                         <p>{money(product.price)}</p>
                       </div>
@@ -387,7 +479,7 @@ function OrderNowModal({
                             <button
                               type="button"
                               onClick={() => setQuantity(product.id, quantity - 1)}
-                              aria-label={`Decrease ${product.name}`}
+                              aria-label={`${t('decrease')} ${product.name}`}
                             >
                               <Minus size={14} />
                             </button>
@@ -395,14 +487,14 @@ function OrderNowModal({
                             <button
                               type="button"
                               onClick={() => setQuantity(product.id, quantity + 1)}
-                              aria-label={`Increase ${product.name}`}
+                              aria-label={`${t('increase')} ${product.name}`}
                             >
                               <Plus size={14} />
                             </button>
                             <button
                               type="button"
                               onClick={() => setQuantity(product.id, 0)}
-                              aria-label={`Remove ${product.name}`}
+                              aria-label={`${t('remove')} ${product.name}`}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -414,7 +506,7 @@ function OrderNowModal({
                             disabled={soldOut || !product.is_available}
                             onClick={() => addToCart(product)}
                           >
-                            {product.is_available ? 'Add' : 'Unavailable'}
+                            {product.is_available ? t('add') : t('unavailable')}
                           </button>
                         )}
                       </div>
@@ -429,18 +521,18 @@ function OrderNowModal({
             <div className="order-modal-panel order-modal-checkout-panel">
               <div className="order-modal-section-heading">
                 <div>
-                  <p>Checkout details</p>
-                  <h3>Set your car details</h3>
+                  <p>{t('checkoutDetails')}</p>
+                  <h3>{t('setDetails')}</h3>
                 </div>
               </div>
 
               {hasSavedAddresses ? (
                 <div className="saved-address-picker order-modal-address-picker">
-                  <span>Saved addresses</span>
+                  <span>{t('savedAddresses')}</span>
                   <div>
                     {userAddresses.map((address, index) => {
                       const addressKey = address.id || `local-${index}`
-                      const addressLabel = [address.address, address.villa_floor, address.town_city].filter(Boolean).join(', ') || `Address ${index + 1}`
+                      const addressLabel = [address.address, address.villa_floor, address.town_city].filter(Boolean).join(', ') || `${t('address')} ${index + 1}`
 
                       return (
                         <button
@@ -460,7 +552,7 @@ function OrderNowModal({
               <div className="order-checkout-grid">
                 <div className="order-car-row">
                   <label>
-                    Car brand
+                    {t('carBrand')}
                     <div className="order-brand-select" ref={brandSelectRef}>
                       <button
                         type="button"
@@ -475,7 +567,7 @@ function OrderNowModal({
                             <span>{selectedBrand.name}</span>
                           </span>
                         ) : (
-                          <span className="order-brand-placeholder">Select car brand</span>
+                          <span className="order-brand-placeholder">{t('selectCarBrand')}</span>
                         )}
                         <span className="order-brand-arrow" aria-hidden="true">▾</span>
                       </button>
@@ -485,7 +577,7 @@ function OrderNowModal({
                           <input
                             type="text"
                             value={brandSearch}
-                            placeholder="Search brand"
+                            placeholder={t('searchBrand')}
                             onChange={(event) => setBrandSearch(event.target.value)}
                           />
                           <div className="order-brand-options" role="listbox">
@@ -509,9 +601,8 @@ function OrderNowModal({
                     </div>
                   </label>
                   <label>
-                    Car number
+                    {t('carNumber')}
                     <input
-                      required
                       value={checkoutForm.car_number}
                       onChange={(event) =>
                         setCheckoutForm({ ...checkoutForm, car_number: event.target.value })
@@ -521,7 +612,7 @@ function OrderNowModal({
                 </div>
 
                 <label>
-                  Phone number
+                  {t('phoneNumber')}
                   <PhoneInput
                     country="ae"
                     countryCodeEditable
@@ -541,8 +632,57 @@ function OrderNowModal({
                   />
                 </label>
                 {!isCheckoutPhoneValid && checkoutForm.customer_phone ? (
-                  <p className="field-hint error">Enter a valid phone number with country code.</p>
+                  <p className="field-hint error">{t('validPhone')}</p>
                 ) : null}
+
+                <div className="order-loyalty-box" aria-live="polite">
+                  {loyaltyState?.loading ? <p className="field-hint">{t('checkingLoyalty')}</p> : null}
+                  {loyaltyState?.error ? <p className="field-hint error">{loyaltyState.error}</p> : null}
+
+                  {loyaltyData?.message_en ? <p className="field-hint">{loyaltyData.message_en}</p> : null}
+                  {loyaltyData?.message_ar ? <p className="field-hint">{loyaltyData.message_ar}</p> : null}
+
+                  {hasFreeReward ? (
+                    <>
+                      <label className="order-loyalty-toggle">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(checkoutForm.use_free_cup)}
+                          onChange={(event) => {
+                            const enabled = event.target.checked
+                            setCheckoutForm((current) => ({
+                              ...current,
+                              use_free_cup: enabled,
+                              free_cups_to_use: enabled
+                                ? (current.free_cups_to_use || '1')
+                                : '',
+                            }))
+                          }}
+                        />
+                        <span>{t('useReward').replace('{count}', String(freeCupsAvailable))}</span>
+                      </label>
+
+                      {checkoutForm.use_free_cup ? (
+                        <label>
+                          {t('freeCupsToUse')}
+                          <input
+                            type="number"
+                            min="1"
+                            max={String(Math.max(1, freeCupsAvailable))}
+                            value={checkoutForm.free_cups_to_use}
+                            onChange={(event) => {
+                              const nextValue = event.target.value
+                              setCheckoutForm((current) => ({
+                                ...current,
+                                free_cups_to_use: nextValue,
+                              }))
+                            }}
+                          />
+                        </label>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
               </div>
             </div>
           ) : null}
@@ -551,26 +691,25 @@ function OrderNowModal({
             <div className="order-modal-panel order-modal-payment-panel">
               <div className="order-modal-section-heading">
                 <div>
-                  <p>Payment</p>
-                  <h3>Payment wiring comes next</h3>
+                  <p>{t('payment')}</p>
+                  <h3>{t('paymentWiring')}</h3>
                 </div>
               </div>
 
               <div className="order-payment-placeholder">
-                <strong>Payment component placeholder</strong>
+                <strong>{t('paymentPlaceholder')}</strong>
                 <p>
-                  This step is ready in the popup flow. We can connect card, Apple Pay,
-                  or any gateway here in the next pass.
+                  {t('paymentPlaceholderBody')}
                 </p>
               </div>
 
               <div className="order-payment-summary">
                 <div>
-                  <span>Total cups</span>
+                  <span>{t('totalCups')}</span>
                   <strong>{cartCups}</strong>
                 </div>
                 <div>
-                  <span>Total amount</span>
+                  <span>{t('totalAmount')}</span>
                   <strong>{money(cartTotal)}</strong>
                 </div>
               </div>
@@ -587,7 +726,7 @@ function OrderNowModal({
             >
               <>
                 <ChevronLeft size={16} />
-                Back
+                {t('back')}
               </>
             </button>
           ) : null}
@@ -599,7 +738,7 @@ function OrderNowModal({
               disabled={step === 1 ? !canContinueFromProducts : !canContinueFromCheckout}
               onClick={() => setStep((current) => current + 1)}
             >
-              {step === 1 ? 'Continue to checkout' : 'Continue to payment'}
+              {step === 1 ? t('continueCheckout') : t('continuePayment')}
             </button>
           ) : (
             <button
@@ -608,7 +747,7 @@ function OrderNowModal({
               disabled={cartCups === 0 || soldOut}
               onClick={onSubmitOrder}
             >
-              Place order
+              {t('placeOrder')}
             </button>
           )}
         </footer>

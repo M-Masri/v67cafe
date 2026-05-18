@@ -489,26 +489,47 @@
 }
 
 .marquee__wrapper {
-  --marquee-gap: 18px;
+  --marquee-item-gap: 28px;
+  --marquee-duration: 24s;
   width: min(560px, 100%);
-  display: flex;
-  align-items: center;
-  gap: var(--marquee-gap);
+  display: block;
+  position: relative;
   overflow: hidden;
   padding: 8px 0;
   mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+  min-height: 64px;
 }
 
-.marquee__content {
-  flex-shrink: 0;
-  min-width: max-content;
-  animation: heroMarquee 24s linear infinite;
+.marquee__track {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+.marquee__track--primary {
+  animation: heroMarqueePrimary var(--marquee-duration) linear infinite;
+}
+
+.marquee__track--clone {
+  animation: heroMarqueeClone var(--marquee-duration) linear infinite;
+}
+
+.marquee__wrapper--reverse .marquee__track--primary {
+  animation-name: heroMarqueePrimaryReverse;
+}
+
+.marquee__wrapper--reverse .marquee__track--clone {
+  animation-name: heroMarqueeCloneReverse;
 }
 
 .marquee__repeated-items {
   display: flex;
   align-items: center;
-  gap: 28px;
+  gap: var(--marquee-item-gap);
+  padding-right: var(--marquee-item-gap);
 }
 
 .marquee__item {
@@ -527,18 +548,48 @@
   height: 64px;
 }
 
-@keyframes heroMarquee {
+@keyframes heroMarqueePrimary {
   from {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
   }
 
   to {
-    transform: translateX(calc(-100% - var(--marquee-gap)));
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes heroMarqueeClone {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes heroMarqueePrimaryReverse {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+@keyframes heroMarqueeCloneReverse {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .marquee__content {
+  .marquee__track {
     animation: none;
   }
 }
@@ -2066,6 +2117,25 @@ button:disabled {
   box-shadow: 0 0 0 4px rgba(90, 47, 43, 0.1) !important;
 }
 
+.site-shell[dir='rtl'] .checkout-form .phone-field,
+.site-shell[dir='rtl'] .order-checkout-grid .phone-field {
+  direction: ltr;
+}
+
+.site-shell[dir='rtl'] .checkout-form .phone-field .phone-field-input,
+.site-shell[dir='rtl'] .order-checkout-grid .phone-field .phone-field-input {
+  text-align: left;
+  padding: 13px 14px 13px 52px !important;
+}
+
+.site-shell[dir='rtl'] .checkout-form .phone-field .phone-field-flag,
+.site-shell[dir='rtl'] .order-checkout-grid .phone-field .phone-field-flag,
+.site-shell[dir='rtl'] .checkout-form .phone-field .phone-field-flag .selected-flag,
+.site-shell[dir='rtl'] .order-checkout-grid .phone-field .phone-field-flag .selected-flag {
+  left: 0;
+  right: auto;
+}
+
 .checkout-form input:focus,
 .checkout-form textarea:focus,
 .account-form input:focus,
@@ -2974,6 +3044,31 @@ button:disabled {
 .order-checkout-grid textarea {
   min-height: 110px;
   resize: vertical;
+}
+
+.order-loyalty-box {
+  border: 1px solid rgba(63, 38, 24, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 253, 248, 0.72);
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.order-loyalty-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  font-weight: 700;
+}
+
+.order-loyalty-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
 }
 
 .order-brand-select {
