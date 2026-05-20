@@ -143,6 +143,26 @@ body {
   object-fit: contain;
 }
 
+.money-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28em;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.money-value.is-arabic {
+  flex-direction: row;
+}
+
+.money-symbol {
+  display: inline-block;
+  width: 0.92em;
+  height: 0.92em;
+  flex: 0 0 auto;
+  background: center / contain no-repeat url('/Dirham_Symbol.svg.png');
+}
+
 .site-nav nav {
   justify-content: center;
   gap: clamp(22px, 3vw, 40px);
@@ -2331,75 +2351,96 @@ button:disabled {
 
 .notice {
   position: fixed;
-  top: 22px;
-  right: 22px;
+  top: 20px;
+  right: 20px;
   z-index: 70;
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  width: min(420px, calc(100vw - 32px));
-  min-height: 0;
-  padding: 14px 14px 14px 18px;
-  border: 1px solid rgba(255, 250, 242, 0.42);
-  border-radius: 22px;
-  background:
-    linear-gradient(135deg, rgba(255, 250, 242, 0.98), rgba(246, 237, 221, 0.94)),
-    linear-gradient(135deg, rgba(183, 139, 75, 0.12), rgba(89, 99, 73, 0.08));
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+  width: min(360px, calc(100vw - 28px));
+  padding: 14px;
+  border: 1px solid rgba(25, 23, 19, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 252, 245, 0.96);
   color: var(--espresso);
-  box-shadow: 0 24px 60px rgba(25, 23, 19, 0.18), 0 8px 24px rgba(90, 47, 43, 0.12);
-  text-align: left;
+  box-shadow: 0 18px 42px rgba(25, 23, 19, 0.14);
+  text-align: start;
   text-transform: none;
-  overflow: hidden;
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(10px);
   animation: notice-enter 220ms ease;
 }
 
-.notice::before {
-  content: '';
-  width: 4px;
-  align-self: stretch;
-  border-radius: 999px;
-  background: linear-gradient(180deg, var(--brass), var(--olive));
-  box-shadow: 0 0 0 1px rgba(255, 250, 242, 0.3);
+.notice-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(89, 99, 73, 0.12);
+  color: var(--olive);
 }
 
 .notice-body {
-  flex: 1;
   display: grid;
-  gap: 4px;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 2px;
 }
 
 .notice-body strong {
   color: var(--mahogany);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 900;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-transform: none;
 }
 
-.notice span {
+.notice-body span {
+  color: #5f554c;
   font-size: 0.94rem;
   font-weight: 700;
-  line-height: 1.45;
+  line-height: 1.55;
 }
 
 .notice-dismiss {
   display: inline-grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 1px solid rgba(25, 23, 19, 0.08);
   border-radius: 999px;
-  background: rgba(255, 250, 242, 0.72);
+  background: #fffdf8;
   color: var(--espresso);
   cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
 .notice-dismiss:hover {
-  background: rgba(255, 250, 242, 0.96);
+  background: #ffffff;
   border-color: rgba(25, 23, 19, 0.14);
+  transform: translateY(-1px);
+}
+
+.notice--success .notice-icon {
+  background: rgba(89, 99, 73, 0.12);
+  color: var(--olive);
+}
+
+.notice--error {
+  border-color: rgba(199, 67, 42, 0.18);
+  background: rgba(255, 250, 246, 0.98);
+}
+
+.notice--error .notice-icon {
+  background: rgba(199, 67, 42, 0.12);
+  color: #c7432a;
+}
+
+.site-shell[dir='rtl'] .notice {
+  left: 20px;
+  right: auto;
 }
 
 @keyframes notice-enter {
@@ -2793,6 +2834,7 @@ button:disabled {
   .notice {
     top: 14px;
     right: 15px;
+    left: 15px;
     width: calc(100vw - 30px);
   }
 }

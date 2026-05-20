@@ -58,7 +58,7 @@ const modalTranslations = {
     payment: 'الدفع',
     selectProducts: 'اختر المنتجات',
     chooseFromMenu: 'شو خاطرك اليوم؟',
-    cupsServedToday: 'كم واصلين',
+    cupsServedToday: 'كم واصلين اليوم',
     cups: 'كوب',
     drink: 'مشروب',
     decrease: 'تقليل',
@@ -390,6 +390,7 @@ function OrderNowModal({
 
     setCheckoutForm((current) => ({
       ...current,
+      customer_name: saved.customer_name || current.customer_name,
       car_type: saved.car_type || current.car_type,
       car_number: saved.car_number || current.car_number,
       customer_phone: saved.customer_phone || current.customer_phone,
@@ -397,20 +398,22 @@ function OrderNowModal({
   }, [isOpen, setCheckoutForm])
 
   useEffect(() => {
+    const customerName = checkoutForm.customer_name?.trim() || ''
     const carType = checkoutForm.car_type?.trim() || ''
     const carNumber = checkoutForm.car_number?.trim() || ''
     const customerPhone = checkoutForm.customer_phone?.trim() || ''
 
-    if (!customerPhone) {
+    if (!customerName && !customerPhone) {
       return
     }
 
     writeVehicleProfileCookie({
+      customer_name: customerName,
       car_type: carType,
       car_number: carNumber,
       customer_phone: customerPhone,
     })
-  }, [checkoutForm.car_number, checkoutForm.car_type, checkoutForm.customer_phone])
+  }, [checkoutForm.car_number, checkoutForm.car_type, checkoutForm.customer_name, checkoutForm.customer_phone])
 
   if (!isOpen) {
     return null

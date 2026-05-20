@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  AlertCircle,
   Bean,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Coffee,
@@ -126,6 +128,8 @@ const translations = {
     soldOut: 'Sold Out',
     orderNow: 'Order Now',
     notification: 'Notification',
+    noticeTitleSuccess: 'Done',
+    noticeTitleError: 'Attention',
     dismissNotification: 'Dismiss notification',
     openMenu: 'Open menu',
     openCart: 'Open cart',
@@ -193,16 +197,16 @@ const translations = {
     resendIn: 'Resend in',
     accountCreated: 'Account created successfully.',
     loggedIn: 'Logged in successfully.',
-    otpSent: 'OTP sent to your email.',
-    passwordReset: 'Password has been reset.',
-    profileUpdated: 'Profile updated.',
-    loggedOut: 'Logged out.',
+    otpSent: 'Verification code sent.',
+    passwordReset: 'Password updated successfully.',
+    profileUpdated: 'Profile updated successfully.',
+    loggedOut: 'Signed out successfully.',
     cartEmpty: 'Your cart is empty.',
     cupsNotEnough: 'Not enough cups remain today for this cart.',
     mobileRequired: 'Mobile number is required to place the order.',
     placeOrderFail: 'Failed to place order.',
     loyaltyFail: 'Failed to check loyalty status.',
-    orderPlaced: 'Order {orderNo} placed. Total {total} (discount {discount}).',
+    orderPlaced: 'Your order has been received successfully.',
     pages: {
       '/': {
         label: 'Home',
@@ -249,6 +253,8 @@ const translations = {
     soldOut: 'خلصت الكمية',
     orderNow: 'اطلب الحين',
     notification: 'تنبيه',
+    noticeTitleSuccess: 'تم بنجاح',
+    noticeTitleError: 'تنبيه مهم',
     dismissNotification: 'إغلاق التنبيه',
     openMenu: 'فتح القائمة',
     openCart: 'فتح السلة',
@@ -265,7 +271,7 @@ const translations = {
     cafeHighlightsCta: 'مميزات الكافيه تحت زر الطلب',
     dailyCupProgress: 'تقدم أكواب اليوم',
     cupsSoldOutToday: 'انتهت أكواب اليوم',
-    cupsServedToday: 'كم واصلين',
+    cupsServedToday: 'كم واصلين اليوم',
     allRightsReserved: 'جميع الحقوق محفوظة.',
     shopMenu: 'منيو الطلب',
     noProductsYet: 'للحين ما فيه مشروبات متاحة.',
@@ -316,16 +322,16 @@ const translations = {
     resendIn: 'إعادة الإرسال بعد',
     accountCreated: 'تم إنشاء الحساب بنجاح.',
     loggedIn: 'تم تسجيل الدخول بنجاح.',
-    otpSent: 'تم إرسال OTP على إيميلك.',
-    passwordReset: 'تم تغيير كلمة المرور.',
-    profileUpdated: 'تم تحديث الملف الشخصي.',
-    loggedOut: 'تم تسجيل الخروج.',
+    otpSent: 'تم إرسال رمز التحقق.',
+    passwordReset: 'تم تحديث كلمة المرور بنجاح.',
+    profileUpdated: 'تم تحديث بياناتك بنجاح.',
+    loggedOut: 'تم تسجيل الخروج بنجاح.',
     cartEmpty: 'سلتك فاضية.',
     cupsNotEnough: 'الكمية المتبقية اليوم ما تكفي لهالسلة.',
     mobileRequired: 'رقم الجوال مطلوب لإتمام الطلب.',
     placeOrderFail: 'صار خطأ في إرسال الطلب.',
     loyaltyFail: 'صار خطأ أثناء التحقق من الولاء.',
-    orderPlaced: 'تم تأكيد الطلب {orderNo}. الإجمالي {total} (الخصم {discount}).',
+    orderPlaced: 'تم استلام طلبك بنجاح.',
     pages: {
       '/': {
         label: 'الرئيسية',
@@ -385,11 +391,20 @@ function normalizePath(pathname) {
   return pages.some((page) => page.path === pathname) ? pathname : '/'
 }
 
-function money(value, locale = 'en-US') {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: 'USD',
+function money(value, locale = 'en-AE') {
+  const amount = new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(Number(value || 0))
+  const label = locale.startsWith('ar') ? `${amount} درهم إماراتي` : `AED ${amount}`
+
+  return (
+    <span className={`money-value${locale.startsWith('ar') ? ' is-arabic' : ''}`} aria-label={label}>
+      {locale.startsWith('ar') ? <span>{amount}</span> : null}
+      <span className="money-symbol" aria-hidden="true" />
+      {!locale.startsWith('ar') ? <span>{amount}</span> : null}
+    </span>
+  )
 }
 
 function shortTime(value) {
@@ -651,6 +666,10 @@ function getFirstErrorMessage(error, fallback) {
   return error?.message || fallback
 }
 
+function createNotice(message, tone = 'success') {
+  return { message, tone }
+}
+
 function App() {
   const [catalog, setCatalog] = useState(null)
   const [isCatalogLoading, setIsCatalogLoading] = useState(true)
@@ -669,7 +688,7 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [orderModalOpen, setOrderModalOpen] = useState(false)
   const [orderModalInitialStep, setOrderModalInitialStep] = useState(1)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(null)
   const [scrolled, setScrolled] = useState(false)
   const [token, setToken] = useState(() => localStorage.getItem('cafe67_token'))
   const [user, setUser] = useState(null)
@@ -720,7 +739,7 @@ function App() {
     data: null,
     error: '',
   })
-  const locale = language === 'ar' ? 'ar-AE' : 'en-US'
+  const locale = language === 'ar' ? 'ar-AE' : 'en-AE'
   const isArabic = language === 'ar'
   const t = (key) => getTranslation(language, key)
   const translateTemplate = (key, values = {}) => {
@@ -757,28 +776,49 @@ function App() {
 
   useEffect(() => {
     let active = true
+    let hasLoadedOnce = false
+    let isRefreshing = false
 
-    requestJson(`${API_URL}/catalog`, {}, null)
-      .then((data) => {
-        if (active) {
-          setCatalog(data)
+    const refreshCatalog = async ({ showErrorNotice = false } = {}) => {
+      if (isRefreshing) {
+        return
+      }
+
+      isRefreshing = true
+
+      try {
+        const data = await requestJson(`${API_URL}/catalog`, {}, null)
+
+        if (!active) {
+          return
         }
-      })
-      .catch((error) => {
-        if (active) {
-          setNotice(error.message)
+
+        setCatalog(data)
+        hasLoadedOnce = true
+      } catch (error) {
+        if (active && showErrorNotice) {
+          setNotice(createNotice(error.message, 'error'))
         }
-      })
-      .finally(() => {
+      } finally {
+        isRefreshing = false
+
         if (active) {
           setIsCatalogLoading(false)
         }
-      })
+      }
+    }
+
+    refreshCatalog({ showErrorNotice: true })
+
+    const interval = window.setInterval(() => {
+      refreshCatalog({ showErrorNotice: !hasLoadedOnce })
+    }, 2000)
 
     return () => {
       active = false
+      window.clearInterval(interval)
     }
-  }, [])
+  }, [API_URL])
 
   useEffect(() => {
     if (!token) {
@@ -858,7 +898,7 @@ function App() {
       return undefined
     }
 
-    const timeout = window.setTimeout(() => setNotice(''), 4000)
+    const timeout = window.setTimeout(() => setNotice(null), 4000)
 
     return () => window.clearTimeout(timeout)
   }, [notice])
@@ -929,14 +969,14 @@ function App() {
     [catalog],
   )
   const dailyLimit = catalog?.daily_limit || {
-    accepted_cups: 2,
-    remaining_cups: 97,
+    accepted_cups: 0,
+    remaining_cups: 99,
     limit: 99,
     sold_out: false,
   }
   const soldOut = dailyLimit.sold_out
-  const orderedCount = dailyLimit.accepted_cups || 2
-  const cupLimit = 99
+  const orderedCount = Number.isFinite(Number(dailyLimit.accepted_cups)) ? Number(dailyLimit.accepted_cups) : 0
+  const cupLimit = Number.isFinite(Number(dailyLimit.limit)) ? Number(dailyLimit.limit) : 99
   const brandLogo = settings.logo_url || fallbackLogo
   const headerLogo = homeHeroLogo
   const socialLinks = {
@@ -1154,11 +1194,12 @@ function App() {
       delivery_address: current.delivery_address || formatAddress(addresses.find((address) => address.is_default) || addresses[0]) || '',
     }))
     setToken(data.token)
-    setNotice(
+    setNotice(createNotice(
       authMode === 'register'
         ? t('accountCreated')
         : t('loggedIn'),
-    )
+      'success',
+    ))
     await hydrateAccount(data.token)
   }
 
@@ -1170,7 +1211,7 @@ function App() {
       { method: 'POST', body: JSON.stringify(forgotForm) },
       null,
     )
-    setNotice(data.message || t('otpSent'))
+    setNotice(createNotice(t('otpSent'), 'success'))
     setResetForm((current) => ({ ...current, email: forgotForm.email }))
     setResendAvailableAt(Date.now() + (data.resend_after_seconds || 120) * 1000)
     setResendNow(Date.now())
@@ -1191,7 +1232,7 @@ function App() {
 
     setForgotForm({ email })
     setResetForm((current) => ({ ...current, email }))
-    setNotice(data.message || t('otpSent'))
+    setNotice(createNotice(t('otpSent'), 'success'))
     setResendAvailableAt(Date.now() + (data.resend_after_seconds || 120) * 1000)
     setResendNow(Date.now())
   }
@@ -1204,7 +1245,7 @@ function App() {
       { method: 'POST', body: JSON.stringify(resetForm) },
       null,
     )
-    setNotice(data.message || t('passwordReset'))
+    setNotice(createNotice(t('passwordReset'), 'success'))
     setResetForm({ email: '', otp: '', password: '', password_confirmation: '' })
     setResendAvailableAt(null)
     setAuthMode('login')
@@ -1238,7 +1279,7 @@ function App() {
       customer_phone: savedAddresses.find((address) => address.is_default)?.phone || data.user.phone || current.customer_phone,
       delivery_address: formatAddress(savedAddresses.find((address) => address.is_default) || savedAddresses[0]) || current.delivery_address,
     }))
-    setNotice(t('profileUpdated'))
+    setNotice(createNotice(t('profileUpdated'), 'success'))
   }
 
   const openAccountView = (nextView, event) => {
@@ -1309,26 +1350,26 @@ function App() {
     setUserAddresses([{ ...emptyAddress, is_default: true }])
     setSelectedCheckoutAddressId(null)
     setAccountView('dashboard')
-    setNotice(t('loggedOut'))
+    setNotice(createNotice(t('loggedOut'), 'success'))
   }
 
   const submitOrder = async (event) => {
     event?.preventDefault?.()
 
     if (cartItems.length === 0) {
-      setNotice(t('cartEmpty'))
+      setNotice(createNotice(t('cartEmpty'), 'error'))
       return
     }
 
     if (cartCups > dailyLimit.remaining_cups) {
-      setNotice(t('cupsNotEnough'))
+      setNotice(createNotice(t('cupsNotEnough'), 'error'))
       return
     }
 
     const mobileNumber = normalizePhoneForLoyalty(checkoutForm.customer_phone)
 
     if (!mobileNumber) {
-      setNotice(t('mobileRequired'))
+      setNotice(createNotice(t('mobileRequired'), 'error'))
       return
     }
 
@@ -1361,18 +1402,14 @@ function App() {
         token,
       )
     } catch (error) {
-      setNotice(getFirstErrorMessage(error, t('placeOrderFail')))
+      setNotice(createNotice(getFirstErrorMessage(error, t('placeOrderFail')), 'error'))
       return
     }
 
     setCart([])
     setOrderModalOpen(false)
     setCatalog((current) => ({ ...current, daily_limit: data.daily_limit }))
-    setNotice(translateTemplate('orderPlaced', {
-      orderNo: data.order.order_number,
-      total: money(data.order.total, locale),
-      discount: money(data.order.discount_total, locale),
-    }))
+    setNotice(createNotice(t('orderPlaced'), 'success'))
     setCheckoutForm((current) => ({
       ...current,
       cup_type: 'carton',
@@ -2383,12 +2420,15 @@ function App() {
       ) : null}
 
       {notice ? (
-        <div className="notice" role="status" aria-live="polite">
-          <div className="notice-body">
-            <strong>{t('notification')}</strong>
-            <span>{notice}</span>
+        <div className={`notice notice--${notice.tone}`} role="status" aria-live="polite">
+          <div className="notice-icon" aria-hidden="true">
+            {notice.tone === 'error' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
           </div>
-          <button className="notice-dismiss" type="button" onClick={() => setNotice('')} aria-label={t('dismissNotification')}>
+          <div className="notice-body">
+            <strong>{notice.tone === 'error' ? t('noticeTitleError') : t('noticeTitleSuccess')}</strong>
+            <span>{notice.message}</span>
+          </div>
+          <button className="notice-dismiss" type="button" onClick={() => setNotice(null)} aria-label={t('dismissNotification')}>
             <X size={16} />
           </button>
         </div>
