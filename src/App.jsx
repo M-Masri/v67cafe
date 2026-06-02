@@ -31,7 +31,7 @@ import fallbackLogo from './assets/v67-logo.svg'
 import OrderNowModal from './components/OrderNowModal'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
-const homeHeroLogo = '/v67_logo_C64429.svg'
+const homeHeroLogo = '/v67_logo_C64429.webp'
 const fallbackHero = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1800&q=85'
 const fallbackImages = [
   'https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=80',
