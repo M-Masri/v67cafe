@@ -10,8 +10,10 @@ import {
   IceCreamBowl,
   Menu,
   Minus,
+  PhoneCall,
   Package,
   Plus,
+  MapPin,
   ShoppingBag,
   Trash2,
   Wheat,
@@ -431,29 +433,12 @@ function isValidInternationalPhone(value) {
   return /^\+\d{8,15}$/.test(String(value || ''))
 }
 
-function FacebookIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
-    </svg>
-  )
-}
-
 function InstagramIcon(props) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
       <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
       <path d="M16 11.37a4 4 0 1 1-3.37-3.37 4 4 0 0 1 3.37 3.37z" />
       <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-    </svg>
-  )
-}
-
-function WhatsAppIcon(props) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-5A8.5 8.5 0 1 1 21 11.5Z" />
-      <path d="M9.5 9.5c.3-1 1-.9 1.3-.9h.4c.1 0 .3 0 .4.3l.6 1.5c.1.2 0 .4-.1.6l-.5.6c-.1.1-.2.3-.1.5.3.6.8 1.2 1.4 1.7.7.6 1.3 1 2.1 1.3.2.1.4 0 .5-.1l.6-.7c.2-.2.4-.2.6-.1l1.4.7c.2.1.3.2.3.4v.4c0 .4.1 1-.8 1.3-.8.3-2.7.1-4.5-1.6-1.6-1.5-2.6-3.5-2.1-4.5Z" />
     </svg>
   )
 }
@@ -954,7 +939,7 @@ function App() {
       image: bannerImage,
       colorA: '#FFF8D4',
       colorB: '#FFF8D4',
-      colorC: '#D83B32',
+      colorC: '#76593B',
     }
   }, [activePage.subtitle, activePage.title, banner.background_image_url, banner.description, banner.title])
   const products = useMemo(() => {
@@ -977,24 +962,18 @@ function App() {
   const soldOut = dailyLimit.sold_out
   const orderedCount = Number.isFinite(Number(dailyLimit.accepted_cups)) ? Number(dailyLimit.accepted_cups) : 0
   const cupLimit = Number.isFinite(Number(dailyLimit.limit)) ? Number(dailyLimit.limit) : 99
-  const brandLogo = settings.logo_url || fallbackLogo
-  const headerLogo = homeHeroLogo
+  const phoneDigits = String(settings.phone || '').replace(/[^\d+]/g, '')
   const socialLinks = {
-    facebook: settings.social_links?.facebook || '#',
+    call: phoneDigits ? `tel:${phoneDigits}` : '#',
     instagram: settings.social_links?.instagram || '#',
-    whatsapp: settings.social_links?.whatsapp || normalizeWhatsAppLink(settings.whatsapp),
+    location: settings.social_links?.location || settings.social_links?.maps || settings.location_url || '#',
   }
   const marqueeItems = useMemo(
     () => [
-      { id: 'coffee-cup', label: 'Coffee Cup', Icon: GiCoffeeCup },
-      { id: 'coffee-steam', label: 'Coffee Steam', Icon: FaMugHot },
-      { id: 'coffee-bean', label: 'Coffee Bean', Icon: GiCoffeeBeans },
-      { id: 'espresso-shot', label: 'Espresso Shot', Icon: GiCoffeePot },
-      { id: 'donut', label: 'Donut', Icon: GiDonut },
-      { id: 'cookie', label: 'Cookie', Icon: FaCookieBite },
-      { id: 'ice', label: 'Ice Cubes', Icon: GiIceCube },
-      { id: 'icecream', label: 'Ice Cream', Icon: FaIceCream },
-      { id: 'croissant', label: 'Croissant', Icon: LuCroissant },
+      { id: 'v60', label: 'V60', iconSrc: '/v60.svg' },
+      { id: 'pourover', label: 'Pourover', iconSrc: '/pour-over.svg' },
+      { id: 'beans', label: 'Beans', iconSrc: '/coffee-beans.svg' },
+      { id: 'ice', label: 'Ice', iconSrc: '/melting.svg' },
     ],
     [],
   )
@@ -1443,7 +1422,12 @@ function App() {
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={item.id}>
-                    <item.Icon className="marquee__icon" />
+                    <span
+                      className="marquee__icon marquee__icon-mask"
+                      style={{ '--icon-url': `url(${item.iconSrc})` }}
+                      role="img"
+                      aria-label={item.label}
+                    />
                   </div>
                 ))}
               </div>
@@ -1452,7 +1436,11 @@ function App() {
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={`${item.id}-duplicate`}>
-                    <item.Icon className="marquee__icon" />
+                    <span
+                      className="marquee__icon marquee__icon-mask"
+                      style={{ '--icon-url': `url(${item.iconSrc})` }}
+                      aria-hidden="true"
+                    />
                   </div>
                 ))}
               </div>
@@ -1460,8 +1448,8 @@ function App() {
           </div>
 
           <div className="daily-count-display" aria-label={t('dailyCupProgress')}>
+            <span>{soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
             <strong>{soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`}</strong>
-            <span >{soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
           </div>
 
           <div className="hero-cta-row">
@@ -1480,7 +1468,12 @@ function App() {
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={`${item.id}-cta`}>
-                    <item.Icon className="marquee__icon" />
+                    <span
+                      className="marquee__icon marquee__icon-mask"
+                      style={{ '--icon-url': `url(${item.iconSrc})` }}
+                      role="img"
+                      aria-label={item.label}
+                    />
                   </div>
                 ))}
               </div>
@@ -1489,7 +1482,11 @@ function App() {
               <div className="marquee__repeated-items">
                 {marqueeItems.map((item) => (
                   <div className="marquee__item" key={`${item.id}-cta-duplicate`}>
-                    <item.Icon className="marquee__icon" />
+                    <span
+                      className="marquee__icon marquee__icon-mask"
+                      style={{ '--icon-url': `url(${item.iconSrc})` }}
+                      aria-hidden="true"
+                    />
                   </div>
                 ))}
               </div>
@@ -1502,14 +1499,14 @@ function App() {
       </div>
       <div className="home-showcase-footer">
         <div className="hero-social" aria-label={isArabic ? 'روابط التواصل الاجتماعي' : 'Social media links'}>
-          <a href={socialLinks.facebook} target="_blank" rel="noreferrer" aria-label="Facebook">
-            <FacebookIcon />
+          <a href={socialLinks.call} aria-label={isArabic ? 'اتصال' : 'Call'}>
+            <PhoneCall />
           </a>
           <a href={socialLinks.instagram} target="_blank" rel="noreferrer" aria-label="Instagram">
             <InstagramIcon />
           </a>
-          <a href={socialLinks.whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp">
-            <WhatsAppIcon />
+          <a href={socialLinks.location} target="_blank" rel="noreferrer" aria-label={isArabic ? 'لوكيشن' : 'Location'}>
+            <MapPin />
           </a>
         </div>
         <p>
@@ -2275,15 +2272,6 @@ function App() {
           <div className="hero-inner home-hero-inner">
             <div className="hero-home-actions">
               <header className={`site-nav home-site-nav ${scrolled ? 'is-scrolled' : ''}`}>
-                <a
-                  className="site-brand"
-                  href="/"
-                  onClick={(event) => openPage('/', event)}
-                  aria-label={settings.cafe_name || 'Cafe 67'}
-                >
-                  <img src={headerLogo} alt={settings.cafe_name || 'Cafe 67'} />
-                </a>
-
                 <nav aria-label={t('mainNavigation')}>
                   {navPages.map((page) => (
                     <a
@@ -2360,15 +2348,6 @@ function App() {
     <main className={`site-shell route-${activePage.path === '/' ? 'home' : activePage.path.slice(1).replaceAll('/', '-')}`} dir={isArabic ? 'rtl' : 'ltr'}>
       {activePage.path !== '/' ? (
         <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
-          <a
-            className="site-brand"
-            href="/"
-            onClick={(event) => openPage('/', event)}
-            aria-label={settings.cafe_name || 'Cafe 67'}
-          >
-            <img src={headerLogo} alt={settings.cafe_name || 'Cafe 67'} />
-          </a>
-
           <nav aria-label={t('mainNavigation')}>
             {navPages.map((page) => (
               <a
@@ -2540,3 +2519,4 @@ function App() {
 }
 
 export default App
+
