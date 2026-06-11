@@ -2922,7 +2922,7 @@ button:disabled {
   width: min(1080px, 100%);
   max-height: min(960px, calc(100svh - 24px));
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   overflow: hidden;
   border: 1px solid rgba(216, 59, 50, 0.16);
   border-radius: 28px;
@@ -2952,6 +2952,15 @@ button:disabled {
 
 .order-modal-footer.single-action {
   justify-content: flex-end;
+  flex-shrink: 0;
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+}
+
+.order-modal-footer.single-action .order-modal-primary {
+  width: auto;
+  min-width: min(100%, 280px);
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .order-modal-header {
@@ -3133,6 +3142,7 @@ button:disabled {
 
 .order-modal-body {
   overflow: auto;
+  min-height: 0;
   padding: 0 28px 28px;
 }
 
@@ -3558,9 +3568,75 @@ button:disabled {
   gap: 18px;
 }
 
+.stripe-payment-shell {
+  position: relative;
+}
+
+.stripe-payment-shell.is-busy {
+  pointer-events: none;
+}
+
+.stripe-payment-shell.is-busy .stripe-payment-form {
+  opacity: 0.45;
+}
+
 .stripe-pay-button {
   width: 100%;
   margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.stripe-pay-button.is-loading {
+  opacity: 0.92;
+}
+
+.order-payment-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid rgba(0, 127, 130, 0.22);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(0, 127, 130, 0.08), rgba(255, 250, 242, 0.92));
+}
+
+.order-payment-status strong {
+  display: block;
+  margin: 0 0 4px;
+  color: #007F82;
+  font-size: 1rem;
+}
+
+.order-payment-status p {
+  margin: 0;
+  color: #5f564a;
+  line-height: 1.55;
+  font-size: 0.92rem;
+}
+
+.order-payment-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(0, 127, 130, 0.18);
+  border-top-color: #007F82;
+  border-radius: 50%;
+  animation: order-payment-spin 0.8s linear infinite;
+  flex: 0 0 auto;
+}
+
+.order-payment-spinner-inline {
+  width: 18px;
+  height: 18px;
+  border-width: 2px;
+}
+
+@keyframes order-payment-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .order-payment-order-number {
@@ -3639,6 +3715,7 @@ button:disabled {
 .order-modal-footer {
   border-top: 1px solid rgba(88, 78, 66, 0.1);
   background: rgba(255, 250, 242, 0.84);
+  flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
@@ -3647,10 +3724,19 @@ button:disabled {
   }
 
   .order-modal-section-heading,
-  .order-modal-footer,
+  .order-modal-footer:not(.single-action),
   .order-payment-summary {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .order-modal-footer.single-action {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .order-modal-footer.single-action .order-modal-primary {
+    width: 100%;
   }
 
   .order-modal-payment-panel .order-payment-summary {
@@ -3696,6 +3782,10 @@ button:disabled {
   .order-modal-header,
   .order-modal-footer {
     padding-block: 16px;
+  }
+
+  .order-modal-footer.single-action {
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
   }
 
   .order-modal-counter {
@@ -3825,6 +3915,10 @@ button:disabled {
   .order-modal-header,
   .order-modal-footer {
     padding-block: 12px;
+  }
+
+  .order-modal-footer.single-action {
+    padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
   }
 
   .order-modal-kicker,

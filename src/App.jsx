@@ -1407,11 +1407,15 @@ function App() {
       ? `?mobile_number=${encodeURIComponent(mobileNumber)}`
       : ''
 
+    // Guest payment endpoints verify by phone. Avoid sending a stale Bearer token
+    // that can cause "not authorized" even when the phone matches the order.
+    const paymentAuthToken = mobileNumber ? null : token
+
     for (let attempt = 0; attempt < 15; attempt += 1) {
       const data = await requestJson(
         `/orders/${orderId}/payment-status${query}`,
         {},
-        token,
+        paymentAuthToken,
       )
 
       if (data.payment_status === 'paid') {
@@ -1446,13 +1450,15 @@ function App() {
   }
 
   const handlePaymentSuccess = async (data) => {
-    const mobileNumber = normalizePhoneForLoyalty(checkoutForm.customer_phone)
+    const mobileNumber = data.order?.mobile_number
+      || normalizePhoneForLoyalty(checkoutForm.customer_phone)
 
     try {
-      await waitForPaidOrder(data.order.id, token ? null : mobileNumber)
+      await waitForPaidOrder(data.order.id, mobileNumber)
       await finishOrderSuccess(data)
     } catch (error) {
       setNotice(createNotice(getFirstErrorMessage(error, t('paymentProcessingFail')), 'error'))
+      throw error
     }
   }
 

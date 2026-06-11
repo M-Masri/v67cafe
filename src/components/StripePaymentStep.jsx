@@ -1,28 +1,46 @@
+import { useState } from 'react'
 import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
 
-function PaymentForm({ payLabel, isPaying, onPaySuccess, onPayError }) {
+function PaymentForm({
+  payLabel,
+  isPaying,
+  onPayStart,
+  onPaySuccess,
+  onPayError,
+}) {
   const stripe = useStripe()
   const elements = useElements()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const isBusy = isPaying || isSubmitting
 
   const handlePay = async () => {
-    if (!stripe || !elements || isPaying) {
+    if (!stripe || !elements || isBusy) {
       return
     }
 
-    const { error } = await stripe.confirmPayment({
-      elements,
-      confirmParams: {
-        return_url: `${window.location.origin}/order/complete`,
-      },
-      redirect: 'if_required',
-    })
+    setIsSubmitting(true)
+    onPayStart?.()
 
-    if (error) {
-      onPayError(error.message)
-      return
+    try {
+      const { error } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/order/complete`,
+        },
+        redirect: 'if_required',
+      })
+
+      if (error) {
+        onPayError(error.message)
+        return
+      }
+
+      await onPaySuccess?.()
+    } catch (error) {
+      onPayError(error?.message || 'Payment failed.')
+    } finally {
+      setIsSubmitting(false)
     }
-
-    onPaySuccess()
   }
 
   return (
@@ -30,11 +48,13 @@ function PaymentForm({ payLabel, isPaying, onPaySuccess, onPayError }) {
       <PaymentElement />
       <button
         type="button"
-        className="order-modal-primary stripe-pay-button"
-        disabled={!stripe || !elements || isPaying}
+        className={`order-modal-primary stripe-pay-button${isBusy ? ' is-loading' : ''}`}
+        disabled={!stripe || !elements || isBusy}
+        aria-busy={isBusy}
         onClick={handlePay}
       >
-        {payLabel}
+        {isBusy ? <span className="order-payment-spinner order-payment-spinner-inline" aria-hidden="true" /> : null}
+        <span>{payLabel}</span>
       </button>
     </div>
   )
@@ -45,6 +65,7 @@ export default function StripePaymentStep({
   stripePromise,
   payLabel,
   isPaying,
+  onPayStart,
   onPaySuccess,
   onPayError,
 }) {
@@ -57,6 +78,7 @@ export default function StripePaymentStep({
       <PaymentForm
         payLabel={payLabel}
         isPaying={isPaying}
+        onPayStart={onPayStart}
         onPaySuccess={onPaySuccess}
         onPayError={onPayError}
       />

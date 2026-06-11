@@ -47,7 +47,10 @@ const modalTranslations = {
     paymentPlaceholderBody: 'This step is ready in the popup flow. We can connect card, Apple Pay, or any gateway here in the next pass.',
     payNow: 'Pay {total}',
     creatingOrder: 'Creating order...',
+    processingPayment: 'Processing your card...',
+    processingPaymentBody: 'Please wait. Do not close this window.',
     confirmingPayment: 'Confirming payment...',
+    confirmingPaymentBody: 'Your card was charged. We are verifying the payment with the cafe.',
     paymentFailed: 'Payment failed. Try again.',
     orderNumber: 'Order number',
     totalCups: 'Total cups',
@@ -96,7 +99,10 @@ const modalTranslations = {
     paymentPlaceholderBody: 'الخطوة جاهزة داخل النافذة. نقدر نربط البطاقة أو Apple Pay أو أي بوابة دفع في المرحلة الجاية.',
     payNow: 'ادفع {total}',
     creatingOrder: 'جاري إنشاء الطلب...',
+    processingPayment: 'جاري معالجة البطاقة...',
+    processingPaymentBody: 'انتظر شوي ولا تقفل النافذة.',
     confirmingPayment: 'جاري تأكيد الدفع...',
+    confirmingPaymentBody: 'تم خصم المبلغ. عم نتأكد من الدفع مع المقهى.',
     paymentFailed: 'فشل الدفع. حاول مرة ثانية.',
     orderNumber: 'رقم الطلب',
     totalCups: 'إجمالي الأكواب',
@@ -363,7 +369,7 @@ function OrderNowModal({
   const [step, setStep] = useState(initialStep)
   const [pendingCheckout, setPendingCheckout] = useState(null)
   const [isCreatingOrder, setIsCreatingOrder] = useState(false)
-  const [isPaying, setIsPaying] = useState(false)
+  const [paymentPhase, setPaymentPhase] = useState('idle')
   const [paymentError, setPaymentError] = useState('')
 
   useEffect(() => {
@@ -377,7 +383,7 @@ function OrderNowModal({
       setPendingCheckout(null)
       setPaymentError('')
       setIsCreatingOrder(false)
-      setIsPaying(false)
+      setPaymentPhase('idle')
     }
 
     return undefined
@@ -433,11 +439,20 @@ function OrderNowModal({
   const orderPayment = pendingCheckout?.payment
   const orderTotal = pendingOrder?.total ?? cartTotal
   const payAmountLabel = formatPayAmount(orderTotal, language)
+  const isPaymentBusy = paymentPhase === 'stripe' || paymentPhase === 'confirming'
   const payLabel = isCreatingOrder
     ? t('creatingOrder')
-    : isPaying
-      ? t('confirmingPayment')
-      : t('payNow').replace('{total}', payAmountLabel)
+    : paymentPhase === 'stripe'
+      ? t('processingPayment')
+      : paymentPhase === 'confirming'
+        ? t('confirmingPayment')
+        : t('payNow').replace('{total}', payAmountLabel)
+  const paymentStatusTitle = paymentPhase === 'confirming'
+    ? t('confirmingPayment')
+    : t('processingPayment')
+  const paymentStatusBody = paymentPhase === 'confirming'
+    ? t('confirmingPaymentBody')
+    : t('processingPaymentBody')
 
   const handleContinueToPayment = async () => {
     if (!onCreatePendingOrder || isCreatingOrder) {
@@ -468,21 +483,30 @@ function OrderNowModal({
     }
   }
 
+  const handleStripePayStart = () => {
+    setPaymentPhase('stripe')
+    setPaymentError('')
+  }
+
   const handleStripePaySuccess = async () => {
     if (!pendingCheckout || !onPaymentSuccess) {
+      setPaymentPhase('idle')
       return
     }
 
-    setIsPaying(true)
-    setPaymentError('')
+    setPaymentPhase('confirming')
 
     try {
       await onPaymentSuccess(pendingCheckout)
     } catch (error) {
       setPaymentError(error.message || t('paymentFailed'))
-    } finally {
-      setIsPaying(false)
+      setPaymentPhase('idle')
     }
+  }
+
+  const handleStripePayError = (message) => {
+    setPaymentPhase('idle')
+    setPaymentError(message || t('paymentFailed'))
   }
   const loyaltyData = loyaltyState?.data
   const remainingCups = Number(loyaltyData?.remaining_cups || 0)
@@ -886,15 +910,28 @@ function OrderNowModal({
                 </div>
               </div>
 
+              {isPaymentBusy ? (
+                <div className="order-payment-status" role="status" aria-live="polite">
+                  <span className="order-payment-spinner" aria-hidden="true" />
+                  <div>
+                    <strong>{paymentStatusTitle}</strong>
+                    <p>{paymentStatusBody}</p>
+                  </div>
+                </div>
+              ) : null}
+
               {orderPayment?.client_secret && stripePromise ? (
-                <StripePaymentStep
-                  clientSecret={orderPayment.client_secret}
-                  stripePromise={stripePromise}
-                  payLabel={payLabel}
-                  isPaying={isCreatingOrder || isPaying}
-                  onPaySuccess={handleStripePaySuccess}
-                  onPayError={(message) => setPaymentError(message || t('paymentFailed'))}
-                />
+                <div className={`stripe-payment-shell${isPaymentBusy ? ' is-busy' : ''}`}>
+                  <StripePaymentStep
+                    clientSecret={orderPayment.client_secret}
+                    stripePromise={stripePromise}
+                    payLabel={payLabel}
+                    isPaying={isPaymentBusy}
+                    onPayStart={handleStripePayStart}
+                    onPaySuccess={handleStripePaySuccess}
+                    onPayError={handleStripePayError}
+                  />
+                </div>
               ) : (
                 <div className="order-payment-placeholder">
                   <strong>{t('paymentPlaceholder')}</strong>
