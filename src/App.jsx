@@ -29,8 +29,9 @@ import './App.css'
 const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
 import fallbackLogo from './assets/v67-logo.svg'
 import OrderNowModal from './components/OrderNowModal'
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api'
+import HeroIconMarquee from './components/HeroIconMarquee'
+import { requestJson } from './config/api'
+import { getStripe } from './lib/stripe'
 const homeHeroLogo = '/v67_logo_C64429.webp'
 const fallbackHero = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1800&q=85'
 const fallbackImages = [
@@ -207,6 +208,7 @@ const translations = {
     cupsNotEnough: 'Not enough cups remain today for this cart.',
     mobileRequired: 'Mobile number is required to place the order.',
     placeOrderFail: 'Failed to place order.',
+    paymentProcessingFail: 'Payment is still processing. Check your orders shortly.',
     loyaltyFail: 'Failed to check loyalty status.',
     orderPlaced: 'Your order has been received successfully.',
     pages: {
@@ -332,6 +334,7 @@ const translations = {
     cupsNotEnough: 'الكمية المتبقية اليوم ما تكفي لهالسلة.',
     mobileRequired: 'رقم الجوال مطلوب لإتمام الطلب.',
     placeOrderFail: 'صار خطأ في إرسال الطلب.',
+    paymentProcessingFail: 'الدفع لسه قيد المعالجة. راجع طلباتك بعد شوي.',
     loyaltyFail: 'صار خطأ أثناء التحقق من الولاء.',
     orderPlaced: 'تم استلام طلبك بنجاح.',
     pages: {
@@ -598,30 +601,6 @@ function formatAddress(address) {
   return [address.address, address.villa_floor, address.town_city].filter(Boolean).join(', ')
 }
 
-async function requestJson(url, options = {}, authToken = null) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      ...(options.headers || {}),
-    },
-  })
-
-  const data = await response.json().catch(() => ({}))
-
-  if (!response.ok) {
-    const error = new Error(
-      data.message || Object.values(data.errors || {})?.[0]?.[0] || 'Request failed.',
-    )
-    error.errors = data.errors || null
-    throw error
-  }
-
-  return data
-}
-
 function normalizePhoneForLoyalty(value) {
   const digits = String(value || '').replace(/\D/g, '')
 
@@ -724,6 +703,12 @@ function App() {
     data: null,
     error: '',
   })
+  const [paymentConfig, setPaymentConfig] = useState({
+    enabled: false,
+    publishable_key: null,
+    currency: 'aed',
+  })
+  const [modalPendingOrder, setModalPendingOrder] = useState(null)
   const locale = language === 'ar' ? 'ar-AE' : 'en-AE'
   const isArabic = language === 'ar'
   const t = (key) => getTranslation(language, key)
@@ -737,8 +722,8 @@ function App() {
 
   const hydrateAccount = async (authToken) => {
     const [me, history] = await Promise.all([
-      requestJson(`${API_URL}/auth/me`, {}, authToken),
-      requestJson(`${API_URL}/orders`, {}, authToken),
+      requestJson('/auth/me', {}, authToken),
+      requestJson('/orders', {}, authToken),
     ])
 
     const addresses = normalizeAddresses(me.user)
@@ -772,7 +757,7 @@ function App() {
       isRefreshing = true
 
       try {
-        const data = await requestJson(`${API_URL}/catalog`, {}, null)
+        const data = await requestJson('/catalog', {}, null)
 
         if (!active) {
           return
@@ -803,7 +788,29 @@ function App() {
       active = false
       window.clearInterval(interval)
     }
-  }, [API_URL])
+  }, [])
+
+  useEffect(() => {
+    let active = true
+
+    requestJson('/payments/config', {}, null)
+      .then((data) => {
+        if (!active) {
+          return
+        }
+
+        setPaymentConfig(data.payment || {
+          enabled: false,
+          publishable_key: null,
+          currency: 'aed',
+        })
+      })
+      .catch(() => null)
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   useEffect(() => {
     if (!token) {
@@ -813,8 +820,8 @@ function App() {
     let active = true
 
     Promise.all([
-      requestJson(`${API_URL}/auth/me`, {}, token),
-      requestJson(`${API_URL}/orders`, {}, token),
+      requestJson('/auth/me', {}, token),
+      requestJson('/orders', {}, token),
     ])
       .then(([me, history]) => {
         if (!active) {
@@ -1024,7 +1031,7 @@ function App() {
 
     const timeout = window.setTimeout(() => {
       requestJson(
-        `${API_URL}/loyalty/check`,
+        '/loyalty/check',
         {
           method: 'POST',
           body: JSON.stringify({ mobile_number: mobileNumber }),
@@ -1055,7 +1062,7 @@ function App() {
       active = false
       window.clearTimeout(timeout)
     }
-  }, [API_URL, checkoutForm.customer_phone, orderModalOpen, token])
+  }, [checkoutForm.customer_phone, orderModalOpen, token])
 
   useEffect(() => {
     const slider = categorySliderRef.current
@@ -1098,6 +1105,7 @@ function App() {
 
   const closeOrderModal = () => {
     setOrderModalOpen(false)
+    setModalPendingOrder(null)
   }
 
   const addToCart = (product) => {
@@ -1150,7 +1158,7 @@ function App() {
         : { email: authForm.email, password: authForm.password }
 
     const data = await requestJson(
-      `${API_URL}${endpoint}`,
+      endpoint,
       { method: 'POST', body: JSON.stringify(body) },
       null,
     )
@@ -1186,7 +1194,7 @@ function App() {
     event.preventDefault()
 
     const data = await requestJson(
-      `${API_URL}/auth/forgot-password`,
+      '/auth/forgot-password',
       { method: 'POST', body: JSON.stringify(forgotForm) },
       null,
     )
@@ -1204,7 +1212,7 @@ function App() {
 
     const email = resetForm.email || forgotForm.email
     const data = await requestJson(
-      `${API_URL}/auth/forgot-password`,
+      '/auth/forgot-password',
       { method: 'POST', body: JSON.stringify({ email }) },
       null,
     )
@@ -1220,7 +1228,7 @@ function App() {
     event.preventDefault()
 
     const data = await requestJson(
-      `${API_URL}/auth/reset-password`,
+      '/auth/reset-password',
       { method: 'POST', body: JSON.stringify(resetForm) },
       null,
     )
@@ -1240,7 +1248,7 @@ function App() {
     }))
 
     const data = await requestJson(
-      `${API_URL}/auth/profile`,
+      '/auth/profile',
       {
         method: 'PATCH',
         body: JSON.stringify({ ...profileForm, addresses }),
@@ -1318,7 +1326,7 @@ function App() {
   }
 
   const logout = async () => {
-    await requestJson(`${API_URL}/auth/logout`, { method: 'POST' }, token).catch(
+    await requestJson('/auth/logout', { method: 'POST' }, token).catch(
       () => null,
     )
     localStorage.removeItem('cafe67_token')
@@ -1332,27 +1340,10 @@ function App() {
     setNotice(createNotice(t('loggedOut'), 'success'))
   }
 
-  const submitOrder = async (event) => {
-    event?.preventDefault?.()
-
-    if (cartItems.length === 0) {
-      setNotice(createNotice(t('cartEmpty'), 'error'))
-      return
-    }
-
-    if (cartCups > dailyLimit.remaining_cups) {
-      setNotice(createNotice(t('cupsNotEnough'), 'error'))
-      return
-    }
-
+  const buildOrderBody = () => {
     const mobileNumber = normalizePhoneForLoyalty(checkoutForm.customer_phone)
 
-    if (!mobileNumber) {
-      setNotice(createNotice(t('mobileRequired'), 'error'))
-      return
-    }
-
-    const body = {
+    return {
       customer_name: checkoutForm.customer_name || null,
       mobile_number: mobileNumber,
       cup_type: checkoutForm.cup_type || 'carton',
@@ -1368,25 +1359,33 @@ function App() {
         quantity: item.quantity,
       })),
     }
+  }
 
-    let data
-
-    try {
-      data = await requestJson(
-        `${API_URL}/orders`,
-        {
-          method: 'POST',
-          body: JSON.stringify(body),
-        },
-        token,
-      )
-    } catch (error) {
-      setNotice(createNotice(getFirstErrorMessage(error, t('placeOrderFail')), 'error'))
-      return
+  const validateOrderRequest = () => {
+    if (cartItems.length === 0) {
+      setNotice(createNotice(t('cartEmpty'), 'error'))
+      return false
     }
 
+    if (cartCups > dailyLimit.remaining_cups) {
+      setNotice(createNotice(t('cupsNotEnough'), 'error'))
+      return false
+    }
+
+    const mobileNumber = normalizePhoneForLoyalty(checkoutForm.customer_phone)
+
+    if (!mobileNumber) {
+      setNotice(createNotice(t('mobileRequired'), 'error'))
+      return false
+    }
+
+    return true
+  }
+
+  const finishOrderSuccess = async (data) => {
     setCart([])
     setOrderModalOpen(false)
+    setModalPendingOrder(null)
     setCatalog((current) => ({ ...current, daily_limit: data.daily_limit }))
     setNotice(createNotice(t('orderPlaced'), 'success'))
     setCheckoutForm((current) => ({
@@ -1395,10 +1394,92 @@ function App() {
       use_free_cup: false,
       free_cups_to_use: '',
     }))
+
     if (token) {
       await hydrateAccount(token)
     }
+
     openPage('/')
+  }
+
+  const waitForPaidOrder = async (orderId, mobileNumber) => {
+    const query = mobileNumber
+      ? `?mobile_number=${encodeURIComponent(mobileNumber)}`
+      : ''
+
+    for (let attempt = 0; attempt < 15; attempt += 1) {
+      const data = await requestJson(
+        `/orders/${orderId}/payment-status${query}`,
+        {},
+        token,
+      )
+
+      if (data.payment_status === 'paid') {
+        return data
+      }
+
+      await new Promise((resolve) => {
+        window.setTimeout(resolve, 2000)
+      })
+    }
+
+    throw new Error(t('paymentProcessingFail'))
+  }
+
+  const createPendingOrder = async () => {
+    if (!validateOrderRequest()) {
+      return null
+    }
+
+    return requestJson(
+      '/orders',
+      {
+        method: 'POST',
+        body: JSON.stringify(buildOrderBody()),
+      },
+      token,
+    )
+  }
+
+  const handleOrderComplete = async (data) => {
+    await finishOrderSuccess(data)
+  }
+
+  const handlePaymentSuccess = async (data) => {
+    const mobileNumber = normalizePhoneForLoyalty(checkoutForm.customer_phone)
+
+    try {
+      await waitForPaidOrder(data.order.id, token ? null : mobileNumber)
+      await finishOrderSuccess(data)
+    } catch (error) {
+      setNotice(createNotice(getFirstErrorMessage(error, t('paymentProcessingFail')), 'error'))
+    }
+  }
+
+  const submitOrder = async (event) => {
+    event?.preventDefault?.()
+
+    let data
+
+    try {
+      data = await createPendingOrder()
+    } catch (error) {
+      setNotice(createNotice(getFirstErrorMessage(error, t('placeOrderFail')), 'error'))
+      return
+    }
+
+    if (!data) {
+      return
+    }
+
+    if (!data.payment) {
+      await finishOrderSuccess(data)
+      return
+    }
+
+    setModalPendingOrder(data)
+    setOrderModalInitialStep(3)
+    setOrderModalOpen(true)
   }
 
   const renderHomeContent = () => (
@@ -1417,35 +1498,11 @@ function App() {
             {/* <span>{settings.cafe_name || 'Cafe 67'}</span> */}
           </div>
 
-          <div className="marquee__wrapper" aria-label={t('cafeHighlights')}>
-            <div className="marquee__track marquee__track--primary">
-              <div className="marquee__repeated-items">
-                {marqueeItems.map((item) => (
-                  <div className="marquee__item" key={item.id}>
-                    <span
-                      className="marquee__icon marquee__icon-mask"
-                      style={{ '--icon-url': `url(${item.iconSrc})` }}
-                      role="img"
-                      aria-label={item.label}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="marquee__track marquee__track--clone" aria-hidden="true">
-              <div className="marquee__repeated-items">
-                {marqueeItems.map((item) => (
-                  <div className="marquee__item" key={`${item.id}-duplicate`}>
-                    <span
-                      className="marquee__icon marquee__icon-mask"
-                      style={{ '--icon-url': `url(${item.iconSrc})` }}
-                      aria-hidden="true"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <HeroIconMarquee
+            items={marqueeItems}
+            ariaLabel={t('cafeHighlights')}
+            itemKeyPrefix="top-"
+          />
 
           <div className="daily-count-display" aria-label={t('dailyCupProgress')}>
             <span>{soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
@@ -1463,35 +1520,12 @@ function App() {
             </button>
           </div>
 
-          <div className="marquee__wrapper marquee__wrapper--reverse" aria-label={t('cafeHighlightsCta')}>
-            <div className="marquee__track marquee__track--primary">
-              <div className="marquee__repeated-items">
-                {marqueeItems.map((item) => (
-                  <div className="marquee__item" key={`${item.id}-cta`}>
-                    <span
-                      className="marquee__icon marquee__icon-mask"
-                      style={{ '--icon-url': `url(${item.iconSrc})` }}
-                      role="img"
-                      aria-label={item.label}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="marquee__track marquee__track--clone" aria-hidden="true">
-              <div className="marquee__repeated-items">
-                {marqueeItems.map((item) => (
-                  <div className="marquee__item" key={`${item.id}-cta-duplicate`}>
-                    <span
-                      className="marquee__icon marquee__icon-mask"
-                      style={{ '--icon-url': `url(${item.iconSrc})` }}
-                      aria-hidden="true"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <HeroIconMarquee
+            items={marqueeItems}
+            className="marquee__wrapper--reverse"
+            ariaLabel={t('cafeHighlightsCta')}
+            itemKeyPrefix="bottom-"
+          />
 
 
         </div>
@@ -2439,7 +2473,11 @@ function App() {
         userAddresses={userAddresses}
         selectedCheckoutAddressId={selectedCheckoutAddressId}
         applyCheckoutAddress={applyCheckoutAddress}
-        onSubmitOrder={submitOrder}
+        paymentConfig={paymentConfig}
+        pendingOrderData={modalPendingOrder}
+        onCreatePendingOrder={createPendingOrder}
+        onOrderComplete={handleOrderComplete}
+        onPaymentSuccess={handlePaymentSuccess}
         language={language}
       />
       <aside className={`cart-drawer ${cartOpen ? 'open' : ''}`} aria-label={isArabic ? 'سلة التسوق' : 'Shopping cart'}>

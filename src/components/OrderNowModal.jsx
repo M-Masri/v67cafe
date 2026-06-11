@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { GlassWater, Minus, Package, Plus, Trash2, X } from 'lucide-react'
 import ReactPhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
+import StripePaymentStep from './StripePaymentStep'
+import { getStripe } from '../lib/stripe'
 
 const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
 
@@ -16,6 +19,7 @@ const modalTranslations = {
     selectProducts: 'Select products',
     chooseFromMenu: 'Choose from the current menu',
     cupsServedToday: 'How far are we?',
+    iceV60Only: 'ice v60 only',
     cups: 'cups',
     drink: 'Drink',
     decrease: 'Decrease',
@@ -38,9 +42,14 @@ const modalTranslations = {
     checkingLoyalty: 'Checking loyalty status...',
     useReward: 'Use free cup reward ({count} available)',
     freeCupsToUse: 'Free cups to use',
-    paymentWiring: 'Payment wiring comes next',
+    paymentWiring: 'Pay securely with card or Apple Pay',
     paymentPlaceholder: 'Payment component placeholder',
     paymentPlaceholderBody: 'This step is ready in the popup flow. We can connect card, Apple Pay, or any gateway here in the next pass.',
+    payNow: 'Pay {total}',
+    creatingOrder: 'Creating order...',
+    confirmingPayment: 'Confirming payment...',
+    paymentFailed: 'Payment failed. Try again.',
+    orderNumber: 'Order number',
     totalCups: 'Total cups',
     totalAmount: 'Total amount',
     back: 'Back',
@@ -59,6 +68,7 @@ const modalTranslations = {
     selectProducts: 'اختر المنتجات',
     chooseFromMenu: 'شو خاطرك اليوم؟',
     cupsServedToday: 'كم واصلين اليوم',
+    iceV60Only: 'ice v60 only',
     cups: 'كوب',
     drink: 'مشروب',
     decrease: 'تقليل',
@@ -81,9 +91,14 @@ const modalTranslations = {
     checkingLoyalty: 'جاري التحقق من الولاء...',
     useReward: 'استخدم مكافأة كوب مجاني ({count} متاح)',
     freeCupsToUse: 'عدد الأكواب المجانية',
-    paymentWiring: 'خطوة الدفع تكون هنا',
+    paymentWiring: 'ادفع بأمان بالبطاقة أو Apple Pay',
     paymentPlaceholder: 'مكان مخصص لمكون الدفع',
     paymentPlaceholderBody: 'الخطوة جاهزة داخل النافذة. نقدر نربط البطاقة أو Apple Pay أو أي بوابة دفع في المرحلة الجاية.',
+    payNow: 'ادفع {total}',
+    creatingOrder: 'جاري إنشاء الطلب...',
+    confirmingPayment: 'جاري تأكيد الدفع...',
+    paymentFailed: 'فشل الدفع. حاول مرة ثانية.',
+    orderNumber: 'رقم الطلب',
     totalCups: 'إجمالي الأكواب',
     totalAmount: 'الإجمالي',
     back: 'رجوع',
@@ -244,6 +259,29 @@ function isValidInternationalPhone(value) {
   return /^\+\d{8,15}$/.test(String(value || ''))
 }
 
+function getProductIconSrc(product) {
+  const slug = String(product.category?.slug || '').toLowerCase()
+  const label = `${product.name || ''} ${product.category?.name || ''}`.toLowerCase()
+
+  if (slug.includes('cold') || label.includes('ice') || label.includes('cold')) {
+    return '/melting.svg'
+  }
+
+  if (label.includes('v60')) {
+    return '/v60.svg'
+  }
+
+  if (label.includes('pour')) {
+    return '/pour-over.svg'
+  }
+
+  if (slug.includes('tea')) {
+    return '/pour-over.svg'
+  }
+
+  return '/coffee-beans.svg'
+}
+
 function BrandLogo({ logo, name, className = '' }) {
   const normalizedLogo = logo || ''
   const domain = normalizedLogo.replace('https://logo.clearbit.com/', '')
@@ -306,10 +344,18 @@ function OrderNowModal({
   userAddresses,
   selectedCheckoutAddressId,
   applyCheckoutAddress,
-  onSubmitOrder,
+  paymentConfig,
+  pendingOrderData,
+  onCreatePendingOrder,
+  onOrderComplete,
+  onPaymentSuccess,
   language = 'en',
 }) {
   const [step, setStep] = useState(initialStep)
+  const [pendingCheckout, setPendingCheckout] = useState(null)
+  const [isCreatingOrder, setIsCreatingOrder] = useState(false)
+  const [isPaying, setIsPaying] = useState(false)
+  const [paymentError, setPaymentError] = useState('')
 
   useEffect(() => {
     if (!isOpen) {
@@ -318,8 +364,26 @@ function OrderNowModal({
 
     setStep(initialStep)
 
+    if (!pendingOrderData) {
+      setPendingCheckout(null)
+      setPaymentError('')
+      setIsCreatingOrder(false)
+      setIsPaying(false)
+    }
+
     return undefined
-  }, [initialStep, isOpen])
+  }, [initialStep, isOpen, pendingOrderData])
+
+  useEffect(() => {
+    if (!isOpen || !pendingOrderData?.payment?.client_secret) {
+      return undefined
+    }
+
+    setPendingCheckout(pendingOrderData)
+    setStep(3)
+
+    return undefined
+  }, [isOpen, pendingOrderData])
 
   useEffect(() => {
     if (!isOpen) {
@@ -343,6 +407,8 @@ function OrderNowModal({
     }
   }, [isOpen, onClose])
 
+  const t = (key) => getModalText(language, key)
+
   const hasSavedAddresses = useMemo(
     () => userAddresses.some((address) => address.address || address.phone || address.town_city || address.villa_floor),
     [userAddresses],
@@ -350,6 +416,64 @@ function OrderNowModal({
   const isCheckoutPhoneValid = isValidInternationalPhone(checkoutForm.customer_phone)
   const canContinueFromProducts = cartCups > 0 && !soldOut
   const canContinueFromCheckout = isCheckoutPhoneValid
+  const stripePromise = useMemo(
+    () => getStripe(paymentConfig?.publishable_key),
+    [paymentConfig?.publishable_key],
+  )
+  const pendingOrder = pendingCheckout?.order
+  const orderPayment = pendingCheckout?.payment
+  const orderTotal = pendingOrder?.total ?? cartTotal
+  const payLabel = (isCreatingOrder
+    ? t('creatingOrder')
+    : isPaying
+      ? t('confirmingPayment')
+      : t('payNow')).replace('{total}', money(orderTotal))
+
+  const handleContinueToPayment = async () => {
+    if (!onCreatePendingOrder || isCreatingOrder) {
+      return
+    }
+
+    setIsCreatingOrder(true)
+    setPaymentError('')
+
+    try {
+      const data = await onCreatePendingOrder()
+
+      if (!data) {
+        return
+      }
+
+      if (!data.payment) {
+        await onOrderComplete?.(data)
+        return
+      }
+
+      setPendingCheckout(data)
+      setStep(3)
+    } catch (error) {
+      setPaymentError(error.message || t('paymentFailed'))
+    } finally {
+      setIsCreatingOrder(false)
+    }
+  }
+
+  const handleStripePaySuccess = async () => {
+    if (!pendingCheckout || !onPaymentSuccess) {
+      return
+    }
+
+    setIsPaying(true)
+    setPaymentError('')
+
+    try {
+      await onPaymentSuccess(pendingCheckout)
+    } catch (error) {
+      setPaymentError(error.message || t('paymentFailed'))
+    } finally {
+      setIsPaying(false)
+    }
+  }
   const loyaltyData = loyaltyState?.data
   const remainingCups = Number(loyaltyData?.remaining_cups || 0)
   const loyaltyMessage = language === 'ar'
@@ -374,7 +498,6 @@ function OrderNowModal({
     || loyaltyMessage
     || hasFreeReward
   )
-  const t = (key) => getModalText(language, key)
   const stepLabels = [t('products'), t('checkout'), t('payment')]
   const dailyCounterValue = soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`
 
@@ -438,11 +561,6 @@ function OrderNowModal({
           </button>
         </header>
 
-        <div className="daily-count-display order-modal-counter" aria-label={t('cupsServedToday')}>
-          <strong>{dailyCounterValue}</strong>
-          <span>{t('cupsServedToday')}</span>
-        </div>
-
         <div className="order-modal-steps" aria-label={t('orderSteps')}>
           {stepLabels.map((label, index) => (
             <button
@@ -466,6 +584,12 @@ function OrderNowModal({
         <div className="order-modal-body">
           {step === 1 ? (
             <div className="order-modal-panel">
+              <div className="daily-count-display order-modal-counter" aria-label={t('cupsServedToday')}>
+                <span>{t('cupsServedToday')}</span>
+                <strong>{dailyCounterValue}</strong>
+                <span className="order-modal-counter-note">{t('iceV60Only')}</span>
+              </div>
+
               <div className="order-modal-section-heading">
                 <div>
                   <p>{t('selectProducts')}</p>
@@ -478,20 +602,22 @@ function OrderNowModal({
               </div>
 
               <div className="order-product-list">
-                {products.map((product, index) => {
+                {products.map((product) => {
                   const cartItem = cartItems.find((item) => item.product_id === product.id)
                   const quantity = cartItem?.quantity || 0
 
                   return (
                     <article className="order-product-card" key={product.id}>
-                      <img
-                        src={product.image_url || fallbackImages[index % fallbackImages.length]}
-                        alt={product.name}
-                      />
-                      <div className="order-product-copy">
-                        <span>{product.category?.name || t('drink')}</span>
-                        <strong>{product.name}</strong>
-                        <p>{money(product.price)}</p>
+                      <div className="order-product-head">
+                        <div className="order-product-title-row">
+                          <span
+                            className="order-product-icon order-product-icon-mask"
+                            style={{ '--icon-url': `url(${getProductIconSrc(product)})` }}
+                            aria-hidden="true"
+                          />
+                          <strong>{product.name}</strong>
+                        </div>
+                        <span className="order-product-price">{money(product.price)}</span>
                       </div>
                       <div className="order-product-actions">
                         {quantity > 0 ? (
@@ -539,13 +665,6 @@ function OrderNowModal({
 
           {step === 2 ? (
             <div className="order-modal-panel order-modal-checkout-panel">
-              <div className="order-modal-section-heading">
-                <div>
-                  <p>{t('checkoutDetails')}</p>
-                  <h3>{t('setDetails')}</h3>
-                </div>
-              </div>
-
               {hasSavedAddresses ? (
                 <div className="saved-address-picker order-modal-address-picker">
                   <span>{t('savedAddresses')}</span>
@@ -570,18 +689,7 @@ function OrderNowModal({
               ) : null}
 
               <div className="order-checkout-grid">
-                <label className="order-checkout-field">
-                  {t('fullName')}
-                  <input
-                    value={checkoutForm.customer_name}
-                    onChange={(event) =>
-                      setCheckoutForm({ ...checkoutForm, customer_name: event.target.value })
-                    }
-                  />
-                </label>
-
                 <fieldset className="order-checkout-field order-cup-type-field">
-                  <legend className="order-cup-type-legend">{t('cupType')}</legend>
                   <div className="order-cup-type-options" role="radiogroup" aria-label={t('cupType')}>
                     <label className={`order-cup-type-option${checkoutForm.cup_type === 'carton' ? ' active' : ''}`}>
                       <input
@@ -617,13 +725,28 @@ function OrderNowModal({
                   </div>
                 </fieldset>
 
-                <label className="order-checkout-field">
-                  {t('carBrand')}
-                  <input
-                    value={checkoutForm.car_type}
-                    onChange={(event) =>
-                      setCheckoutForm({ ...checkoutForm, car_type: event.target.value })
-                    }
+                <label className="order-checkout-field order-checkout-field--phone">
+                  {t('phoneNumber')}
+                  <PhoneInput
+                    country="ae"
+                    onlyCountries={['ae']}
+                    countryCodeEditable={false}
+                    enableSearch={false}
+                    disableDropdown={false}
+                    placeholder="50 123 4567"
+                    containerClass="phone-field"
+                    inputClass="phone-field-input"
+                    buttonClass="phone-field-flag"
+                    preferredCountries={['ae']}
+                    value={normalizePhoneForInput(checkoutForm.customer_phone)}
+                    onChange={(value) => {
+                      const normalizedValue = normalizePhoneForStorage(value)
+                      setCheckoutForm((current) => (
+                        current.customer_phone === normalizedValue
+                          ? current
+                          : { ...current, customer_phone: normalizedValue }
+                      ))
+                    }}
                   />
                 </label>
 
@@ -637,26 +760,16 @@ function OrderNowModal({
                   />
                 </label>
 
-                <label className="order-checkout-field order-checkout-field--phone">
-                  {t('phoneNumber')}
-                  <PhoneInput
-                    country="ae"
-                    countryCodeEditable
-                    placeholder="+971 50 123 4567"
-                    containerClass="phone-field"
-                    inputClass="phone-field-input"
-                    buttonClass="phone-field-flag"
-                    value={normalizePhoneForInput(checkoutForm.customer_phone)}
-                    onChange={(value) => {
-                      const normalizedValue = normalizePhoneForStorage(value)
-                      setCheckoutForm((current) => (
-                        current.customer_phone === normalizedValue
-                          ? current
-                          : { ...current, customer_phone: normalizedValue }
-                      ))
-                    }}
+                <label className="order-checkout-field order-checkout-field--full">
+                  {t('carBrand')}
+                  <input
+                    value={checkoutForm.car_type}
+                    onChange={(event) =>
+                      setCheckoutForm({ ...checkoutForm, car_type: event.target.value })
+                    }
                   />
                 </label>
+
                 {!isCheckoutPhoneValid && checkoutForm.customer_phone ? (
                   <p className="field-hint error order-checkout-field order-checkout-field--phone-hint">{t('validPhone')}</p>
                 ) : null}
@@ -746,12 +859,31 @@ function OrderNowModal({
                 </div>
               </div>
 
-              <div className="order-payment-placeholder">
-                <strong>{t('paymentPlaceholder')}</strong>
-                <p>
-                  {t('paymentPlaceholderBody')}
+              {pendingOrder?.order_number ? (
+                <p className="order-payment-order-number">
+                  {t('orderNumber')}: <strong>{pendingOrder.order_number}</strong>
                 </p>
-              </div>
+              ) : null}
+
+              {orderPayment?.client_secret && stripePromise ? (
+                <StripePaymentStep
+                  clientSecret={orderPayment.client_secret}
+                  stripePromise={stripePromise}
+                  payLabel={payLabel}
+                  isPaying={isCreatingOrder || isPaying}
+                  onPaySuccess={handleStripePaySuccess}
+                  onPayError={(message) => setPaymentError(message || t('paymentFailed'))}
+                />
+              ) : (
+                <div className="order-payment-placeholder">
+                  <strong>{t('paymentPlaceholder')}</strong>
+                  <p>{t('paymentPlaceholderBody')}</p>
+                </div>
+              )}
+
+              {paymentError ? (
+                <p className="field-hint error order-payment-error">{paymentError}</p>
+              ) : null}
 
               <div className="order-payment-summary">
                 <div>
@@ -760,33 +892,39 @@ function OrderNowModal({
                 </div>
                 <div>
                   <span>{t('totalAmount')}</span>
-                  <strong>{money(cartTotal)}</strong>
+                  <strong>{money(orderTotal)}</strong>
                 </div>
               </div>
             </div>
           ) : null}
         </div>
 
-        <footer className="order-modal-footer single-action">
+        <footer className={`order-modal-footer single-action${step === 3 ? ' payment-step' : ''}`}>
           {step < 3 ? (
             <button
               type="button"
               className="order-modal-primary"
-              disabled={step === 1 ? !canContinueFromProducts : !canContinueFromCheckout}
-              onClick={() => setStep((current) => current + 1)}
+              disabled={
+                step === 1
+                  ? !canContinueFromProducts
+                  : !canContinueFromCheckout || isCreatingOrder
+              }
+              onClick={() => {
+                if (step === 1) {
+                  setStep(2)
+                  return
+                }
+
+                handleContinueToPayment()
+              }}
             >
-              {step === 1 ? t('continueCheckout') : t('continuePayment')}
+              {step === 1
+                ? t('continueCheckout')
+                : isCreatingOrder
+                  ? t('creatingOrder')
+                  : t('continuePayment')}
             </button>
-          ) : (
-            <button
-              type="button"
-              className="order-modal-primary"
-              disabled={cartCups === 0 || soldOut}
-              onClick={onSubmitOrder}
-            >
-              {t('placeOrder')}
-            </button>
-          )}
+          ) : null}
         </footer>
       </section>
     </div>

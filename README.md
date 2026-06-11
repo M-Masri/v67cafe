@@ -4,11 +4,19 @@ React/Vite storefront for browsing drinks, tracking the daily remaining cup coun
 
 ## Environment
 
-Create `frontend/.env` if the API URL differs from local Laravel:
+Create `.env` in the project root (see `.env.example`):
 
 ```env
 VITE_API_URL=http://127.0.0.1:8000/api
 ```
+
+Production example:
+
+```env
+VITE_API_URL=https://v67.sawatech.ae/api
+```
+
+All API calls read `VITE_API_URL` through `src/config/api.js`. Restart `npm run dev` after changing `.env`.
 
 ## Scripts
 
