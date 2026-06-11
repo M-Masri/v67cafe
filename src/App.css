@@ -3582,6 +3582,25 @@ button:disabled {
   min-height: 0;
 }
 
+.order-modal-payment-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.order-modal-payment-panel .order-payment-summary {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  justify-content: stretch;
+  gap: 14px;
+  margin: 0;
+}
+
+.order-modal-payment-panel .order-payment-summary > div {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
 .order-payment-summary {
   justify-content: flex-start;
   gap: 14px;
@@ -3632,6 +3651,11 @@ button:disabled {
   .order-payment-summary {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .order-modal-payment-panel .order-payment-summary {
+    flex-direction: row;
+    align-items: stretch;
   }
 
   .order-product-card {

@@ -113,6 +113,15 @@ function getModalText(language, key) {
   return selected[key] || modalTranslations.en[key] || key
 }
 
+function formatPayAmount(value, language) {
+  const amount = new Intl.NumberFormat(language === 'ar' ? 'ar-AE' : 'en-AE', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0))
+
+  return language === 'ar' ? `${amount} د.إ` : `AED ${amount}`
+}
+
 function getArabicRemainingCupsMessage(remainingCups) {
   return matchRemainingCupsMessage(Number(remainingCups) || 0)
 }
@@ -423,11 +432,12 @@ function OrderNowModal({
   const pendingOrder = pendingCheckout?.order
   const orderPayment = pendingCheckout?.payment
   const orderTotal = pendingOrder?.total ?? cartTotal
-  const payLabel = (isCreatingOrder
+  const payAmountLabel = formatPayAmount(orderTotal, language)
+  const payLabel = isCreatingOrder
     ? t('creatingOrder')
     : isPaying
       ? t('confirmingPayment')
-      : t('payNow')).replace('{total}', money(orderTotal))
+      : t('payNow').replace('{total}', payAmountLabel)
 
   const handleContinueToPayment = async () => {
     if (!onCreatePendingOrder || isCreatingOrder) {
@@ -865,6 +875,17 @@ function OrderNowModal({
                 </p>
               ) : null}
 
+              <div className="order-payment-summary">
+                <div>
+                  <span>{t('totalCups')}</span>
+                  <strong>{cartCups}</strong>
+                </div>
+                <div>
+                  <span>{t('totalAmount')}</span>
+                  <strong>{money(orderTotal)}</strong>
+                </div>
+              </div>
+
               {orderPayment?.client_secret && stripePromise ? (
                 <StripePaymentStep
                   clientSecret={orderPayment.client_secret}
@@ -884,17 +905,6 @@ function OrderNowModal({
               {paymentError ? (
                 <p className="field-hint error order-payment-error">{paymentError}</p>
               ) : null}
-
-              <div className="order-payment-summary">
-                <div>
-                  <span>{t('totalCups')}</span>
-                  <strong>{cartCups}</strong>
-                </div>
-                <div>
-                  <span>{t('totalAmount')}</span>
-                  <strong>{money(orderTotal)}</strong>
-                </div>
-              </div>
             </div>
           ) : null}
         </div>
