@@ -40,7 +40,7 @@ const modalTranslations = {
     carBrand: 'What car do you have?',
     carNumber: 'Car number',
     phoneNumber: 'Your phone number',
-    validPhone: 'Enter a valid phone number with country code.',
+    validPhone: 'Enter a valid UAE phone number.',
     checkingLoyalty: 'Checking loyalty status...',
     loadingMenu: 'Loading menu...',
     useReward: 'Use free cup reward ({count} available)',
@@ -93,7 +93,7 @@ const modalTranslations = {
     carBrand: 'شو من المواتر عندك؟',
     carNumber: 'لوحة سيارتك',
     phoneNumber: 'رقم تلفونك',
-    validPhone: 'اكتب رقم جوال صحيح مع مفتاح الدولة.',
+    validPhone: 'أدخل رقم جوال إماراتي صحيح.',
     checkingLoyalty: 'جاري التحقق من الولاء...',
     loadingMenu: 'جاري تحميل القائمة...',
     useReward: 'استخدم مكافأة كوب مجاني ({count} متاح)',
@@ -274,8 +274,12 @@ function normalizePhoneForInput(value) {
   return String(value || '').replace(/\D/g, '')
 }
 
-function isValidInternationalPhone(value) {
-  return /^\+\d{8,15}$/.test(String(value || ''))
+function sanitizeDigitsOnly(value) {
+  return String(value || '').replace(/\D/g, '')
+}
+
+function isValidUaePhone(value) {
+  return /^\+971[0-9]{9}$/.test(String(value || ''))
 }
 
 function getProductCategoryIconSrc(product) {
@@ -463,7 +467,7 @@ function OrderNowModal({
     () => userAddresses.some((address) => address.address || address.phone || address.town_city || address.villa_floor),
     [userAddresses],
   )
-  const isCheckoutPhoneValid = isValidInternationalPhone(checkoutForm.customer_phone)
+  const isCheckoutPhoneValid = isValidUaePhone(checkoutForm.customer_phone)
   const canContinueFromProducts = cartCups > 0 && !soldOut
   const canContinueFromCheckout = isCheckoutPhoneValid
   const checkoutContact = useMemo(
@@ -827,9 +831,11 @@ function OrderNowModal({
                 <label className="order-checkout-field">
                   {t('carNumber')}
                   <input
+                    inputMode="numeric"
+                    autoComplete="off"
                     value={checkoutForm.car_number}
                     onChange={(event) =>
-                      setCheckoutForm({ ...checkoutForm, car_number: event.target.value })
+                      setCheckoutForm({ ...checkoutForm, car_number: sanitizeDigitsOnly(event.target.value) })
                     }
                   />
                 </label>
@@ -843,10 +849,6 @@ function OrderNowModal({
                     }
                   />
                 </label>
-
-                {!isCheckoutPhoneValid && checkoutForm.customer_phone ? (
-                  <p className="field-hint error order-checkout-field order-checkout-field--phone-hint">{t('validPhone')}</p>
-                ) : null}
 
                 {shouldShowLoyaltyBox ? (
                   <div className="order-loyalty-box order-checkout-field order-checkout-field--phone" aria-live="polite">

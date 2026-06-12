@@ -167,7 +167,7 @@ const translations = {
     deliveryInformation: 'Delivery information',
     fullName: 'Full name',
     phoneNumber: 'Phone number',
-    enterValidPhone: 'Enter a valid phone number with country code.',
+    enterValidPhone: 'Enter a valid UAE phone number.',
     carNumber: 'Car number',
     notes: 'Notes',
     placeOrder: 'Place order',
@@ -299,7 +299,7 @@ const translations = {
     deliveryInformation: 'بيانات التسليم',
     fullName: 'الاسم الكامل',
     phoneNumber: 'رقم الجوال',
-    enterValidPhone: 'اكتب رقم جوال صحيح مع مفتاح الدولة.',
+    enterValidPhone: 'أدخل رقم جوال إماراتي صحيح.',
     carNumber: 'رقم السيارة',
     notes: 'ملاحظات',
     placeOrder: 'تأكيد الطلب',
@@ -452,8 +452,12 @@ function normalizePhoneForInput(value) {
   return String(value || '').replace(/\D/g, '')
 }
 
-function isValidInternationalPhone(value) {
-  return /^\+\d{8,15}$/.test(String(value || ''))
+function sanitizeDigitsOnly(value) {
+  return String(value || '').replace(/\D/g, '')
+}
+
+function isValidUaePhone(value) {
+  return /^\+971[0-9]{9}$/.test(String(value || ''))
 }
 
 function InstagramIcon(props) {
@@ -1056,7 +1060,7 @@ function App() {
     ? Math.max(0, Math.ceil((resendAvailableAt - resendNow) / 1000))
     : 0
   const canResendOtp = resendRemainingSeconds === 0
-  const isCheckoutPhoneValid = isValidInternationalPhone(checkoutForm.customer_phone)
+  const isCheckoutPhoneValid = isValidUaePhone(checkoutForm.customer_phone)
 
   useEffect(() => {
     if (!orderModalOpen) {
@@ -1883,16 +1887,15 @@ function App() {
             }}
           />
         </label>
-        {!isCheckoutPhoneValid && checkoutForm.customer_phone ? (
-          <p className="field-hint error">{t('enterValidPhone')}</p>
-        ) : null}
         <label>
           {t('carNumber')}
           <input
             required
+            inputMode="numeric"
+            autoComplete="off"
             value={checkoutForm.car_number}
             onChange={(event) =>
-              setCheckoutForm({ ...checkoutForm, car_number: event.target.value })
+              setCheckoutForm({ ...checkoutForm, car_number: sanitizeDigitsOnly(event.target.value) })
             }
           />
         </label>
