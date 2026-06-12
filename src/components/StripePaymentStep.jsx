@@ -1,5 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Elements, PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
+import {
+  CheckoutElementsProvider,
+  PaymentElement,
+  useCheckoutElements,
+} from '@stripe/react-stripe-js/checkout'
+import { getCheckoutReturnUrl, persistPendingCheckout } from '../lib/checkout'
 
 const DEFAULT_PAYMENT_ELEMENT_OPTIONS = {
   wallets: {
@@ -20,36 +25,37 @@ function getPaymentElementOptions(paymentConfig) {
 
 function PaymentForm({
   paymentElementOptions,
+  paymentConfig,
+  pendingCheckout,
   payLabel,
   isPaying,
   onPayStart,
   onPaySuccess,
   onPayError,
 }) {
-  const stripe = useStripe()
-  const elements = useElements()
+  const checkoutState = useCheckoutElements()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const isBusy = isPaying || isSubmitting
 
   const handlePay = async () => {
-    if (!stripe || !elements || isBusy) {
+    if (checkoutState.type !== 'success' || isBusy) {
       return
     }
 
+    const { checkout } = checkoutState
+
     setIsSubmitting(true)
     onPayStart?.()
+    persistPendingCheckout(pendingCheckout)
 
     try {
-      const { error } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/order/complete`,
-        },
+      const result = await checkout.confirm({
+        returnUrl: getCheckoutReturnUrl(paymentConfig),
         redirect: 'if_required',
       })
 
-      if (error) {
-        onPayError(error.message)
+      if (result.type === 'error') {
+        onPayError(result.error.message)
         return
       }
 
@@ -61,13 +67,21 @@ function PaymentForm({
     }
   }
 
+  if (checkoutState.type === 'loading') {
+    return <p className="order-modal-loading-copy">Loading payment...</p>
+  }
+
+  if (checkoutState.type === 'error') {
+    return <p className="field-hint error order-payment-error">{checkoutState.error.message}</p>
+  }
+
   return (
     <div className="stripe-payment-form">
       <PaymentElement options={paymentElementOptions} />
       <button
         type="button"
         className={`order-modal-primary stripe-pay-button${isBusy ? ' is-loading' : ''}`}
-        disabled={!stripe || !elements || isBusy}
+        disabled={isBusy}
         aria-busy={isBusy}
         onClick={handlePay}
       >
@@ -82,6 +96,7 @@ export default function StripePaymentStep({
   clientSecret,
   stripePromise,
   paymentConfig,
+  pendingCheckout,
   payLabel,
   isPaying,
   onPayStart,
@@ -92,21 +107,27 @@ export default function StripePaymentStep({
     () => getPaymentElementOptions(paymentConfig),
     [paymentConfig],
   )
+  const checkoutOptions = useMemo(
+    () => ({ clientSecret }),
+    [clientSecret],
+  )
 
   if (!clientSecret || !stripePromise) {
     return null
   }
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
+    <CheckoutElementsProvider stripe={stripePromise} options={checkoutOptions}>
       <PaymentForm
         paymentElementOptions={paymentElementOptions}
+        paymentConfig={paymentConfig}
+        pendingCheckout={pendingCheckout}
         payLabel={payLabel}
         isPaying={isPaying}
         onPayStart={onPayStart}
         onPaySuccess={onPaySuccess}
         onPayError={onPayError}
       />
-    </Elements>
+    </CheckoutElementsProvider>
   )
 }
