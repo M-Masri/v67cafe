@@ -27,17 +27,3 @@ export function readPendingCheckout() {
 export function clearPendingCheckout() {
   sessionStorage.removeItem(PENDING_CHECKOUT_STORAGE_KEY)
 }
-
-export function getCheckoutReturnUrl(paymentConfig) {
-  const template = paymentConfig?.return_url
-    || `${window.location.origin}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`
-
-  try {
-    const url = new URL(template)
-    url.protocol = window.location.protocol
-    url.host = window.location.host
-    return url.toString()
-  } catch {
-    return template
-  }
-}

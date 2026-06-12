@@ -4,7 +4,7 @@ import {
   PaymentElement,
   useCheckoutElements,
 } from '@stripe/react-stripe-js/checkout'
-import { getCheckoutReturnUrl, persistPendingCheckout } from '../lib/checkout'
+import { persistPendingCheckout } from '../lib/checkout'
 
 const DEFAULT_PAYMENT_ELEMENT_OPTIONS = {
   wallets: {
@@ -25,7 +25,6 @@ function getPaymentElementOptions(paymentConfig) {
 
 function PaymentForm({
   paymentElementOptions,
-  paymentConfig,
   pendingCheckout,
   payLabel,
   isPaying,
@@ -50,7 +49,6 @@ function PaymentForm({
 
     try {
       const result = await checkout.confirm({
-        returnUrl: getCheckoutReturnUrl(paymentConfig),
         redirect: 'if_required',
       })
 
@@ -120,7 +118,6 @@ export default function StripePaymentStep({
     <CheckoutElementsProvider stripe={stripePromise} options={checkoutOptions}>
       <PaymentForm
         paymentElementOptions={paymentElementOptions}
-        paymentConfig={paymentConfig}
         pendingCheckout={pendingCheckout}
         payLabel={payLabel}
         isPaying={isPaying}
