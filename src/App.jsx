@@ -2581,6 +2581,7 @@ function App() {
         userAddresses={userAddresses}
         selectedCheckoutAddressId={selectedCheckoutAddressId}
         applyCheckoutAddress={applyCheckoutAddress}
+        user={user}
         paymentConfig={paymentConfig}
         pendingOrderData={modalPendingOrder}
         onCreatePendingOrder={createPendingOrder}

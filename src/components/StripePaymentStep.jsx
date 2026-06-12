@@ -25,7 +25,9 @@ function getPaymentElementOptions(paymentConfig) {
 
 function PaymentForm({
   paymentElementOptions,
+  checkoutContact,
   pendingCheckout,
+  emailRequiredMessage,
   payLabel,
   isPaying,
   onPayStart,
@@ -42,14 +44,30 @@ function PaymentForm({
     }
 
     const { checkout } = checkoutState
+    const email = checkoutContact?.email
+
+    if (!email) {
+      onPayError(emailRequiredMessage)
+      return
+    }
 
     setIsSubmitting(true)
     onPayStart?.()
     persistPendingCheckout(pendingCheckout)
 
     try {
+      if (typeof checkout.updateEmail === 'function') {
+        const emailUpdate = await checkout.updateEmail(email)
+
+        if (emailUpdate.type === 'error') {
+          onPayError(emailUpdate.error.message)
+          return
+        }
+      }
+
       const result = await checkout.confirm({
         redirect: 'if_required',
+        email,
       })
 
       if (result.type === 'error') {
@@ -94,7 +112,9 @@ export default function StripePaymentStep({
   clientSecret,
   stripePromise,
   paymentConfig,
+  checkoutContact,
   pendingCheckout,
+  emailRequiredMessage = 'An email address is required to complete payment.',
   payLabel,
   isPaying,
   onPayStart,
@@ -106,8 +126,13 @@ export default function StripePaymentStep({
     [paymentConfig],
   )
   const checkoutOptions = useMemo(
-    () => ({ clientSecret }),
-    [clientSecret],
+    () => ({
+      clientSecret,
+      defaultValues: {
+        email: checkoutContact?.email || undefined,
+      },
+    }),
+    [checkoutContact?.email, clientSecret],
   )
 
   if (!clientSecret || !stripePromise) {
@@ -118,7 +143,9 @@ export default function StripePaymentStep({
     <CheckoutElementsProvider stripe={stripePromise} options={checkoutOptions}>
       <PaymentForm
         paymentElementOptions={paymentElementOptions}
+        checkoutContact={checkoutContact}
         pendingCheckout={pendingCheckout}
+        emailRequiredMessage={emailRequiredMessage}
         payLabel={payLabel}
         isPaying={isPaying}
         onPayStart={onPayStart}

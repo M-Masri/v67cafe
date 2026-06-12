@@ -3,6 +3,7 @@ import { GlassWater, Minus, Package, Plus, X } from 'lucide-react'
 import ReactPhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import StripePaymentStep from './StripePaymentStep'
+import { resolveCheckoutEmail } from '../lib/checkout'
 import { getProductImageUrl } from '../lib/media'
 import { getStripe } from '../lib/stripe'
 
@@ -392,6 +393,7 @@ function OrderNowModal({
   userAddresses,
   selectedCheckoutAddressId,
   applyCheckoutAddress,
+  user,
   paymentConfig,
   pendingOrderData,
   onCreatePendingOrder,
@@ -464,6 +466,16 @@ function OrderNowModal({
   const isCheckoutPhoneValid = isValidInternationalPhone(checkoutForm.customer_phone)
   const canContinueFromProducts = cartCups > 0 && !soldOut
   const canContinueFromCheckout = isCheckoutPhoneValid
+  const checkoutContact = useMemo(
+    () => ({
+      email: resolveCheckoutEmail({
+        user,
+        checkoutForm,
+        order: pendingCheckout?.order,
+      }),
+    }),
+    [checkoutForm, pendingCheckout, user],
+  )
   const stripePromise = useMemo(
     () => getStripe(paymentConfig?.publishable_key),
     [paymentConfig?.publishable_key],
@@ -954,6 +966,7 @@ function OrderNowModal({
                     clientSecret={orderPayment.client_secret}
                     stripePromise={stripePromise}
                     paymentConfig={paymentConfig}
+                    checkoutContact={checkoutContact}
                     pendingCheckout={pendingCheckout}
                     payLabel={payLabel}
                     isPaying={isPaymentBusy}
