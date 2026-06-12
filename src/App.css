@@ -3601,6 +3601,43 @@ button:disabled {
   line-height: 1.7;
 }
 
+.checkout-complete-page {
+  display: grid;
+  place-items: center;
+  min-height: 50vh;
+  padding: 48px 20px;
+}
+
+.checkout-complete-card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  width: min(420px, 100%);
+  padding: 28px 24px;
+  border: 1px solid rgba(199, 122, 90, 0.2);
+  border-radius: 22px;
+  background: rgba(255, 254, 251, 0.96);
+  text-align: center;
+}
+
+.checkout-complete-card h1 {
+  margin: 0;
+  color: var(--mahogany);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.checkout-complete-card p {
+  margin: 0;
+  color: #76593B;
+  line-height: 1.5;
+}
+
+.checkout-complete-spinner {
+  width: 34px;
+  height: 34px;
+}
+
 .stripe-payment-form {
   display: grid;
   gap: 18px;

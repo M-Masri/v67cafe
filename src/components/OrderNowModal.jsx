@@ -954,6 +954,7 @@ function OrderNowModal({
                     clientSecret={orderPayment.client_secret}
                     stripePromise={stripePromise}
                     paymentConfig={paymentConfig}
+                    pendingCheckout={pendingCheckout}
                     payLabel={payLabel}
                     isPaying={isPaymentBusy}
                     onPayStart={handleStripePayStart}

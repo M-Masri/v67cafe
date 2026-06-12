@@ -28,8 +28,10 @@ import './App.css'
 
 const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
 import fallbackLogo from './assets/v67-logo.svg'
+import CheckoutComplete from './components/CheckoutComplete'
 import OrderNowModal from './components/OrderNowModal'
 import HeroIconMarquee from './components/HeroIconMarquee'
+import { clearPendingCheckout, readPendingCheckout } from './lib/checkout'
 import { requestJson } from './config/api'
 import { loadCatalog } from './lib/catalog'
 import { getProductImageUrl } from './lib/media'
@@ -211,6 +213,9 @@ const translations = {
     mobileRequired: 'Mobile number is required to place the order.',
     placeOrderFail: 'Failed to place order.',
     paymentProcessingFail: 'Payment is still processing. Check your orders shortly.',
+    completingPayment: 'Completing your payment',
+    completingPaymentBody: 'Please wait while we confirm your order.',
+    checkoutSessionMissing: 'We could not find your checkout session. If you were charged, contact the cafe.',
     loyaltyFail: 'Failed to check loyalty status.',
     orderPlaced: 'Your order has been received successfully.',
     pages: {
@@ -337,6 +342,9 @@ const translations = {
     mobileRequired: 'رقم الجوال مطلوب لإتمام الطلب.',
     placeOrderFail: 'صار خطأ في إرسال الطلب.',
     paymentProcessingFail: 'الدفع لسه قيد المعالجة. راجع طلباتك بعد شوي.',
+    completingPayment: 'جاري إتمام الدفع',
+    completingPaymentBody: 'انتظر شوي لحد ما نأكد طلبك.',
+    checkoutSessionMissing: 'ما لقينا جلسة الدفع. إذا انخصم المبلغ، تواصل مع المقهى.',
     loyaltyFail: 'صار خطأ أثناء التحقق من الولاء.',
     orderPlaced: 'تم استلام طلبك بنجاح.',
     pages: {
@@ -395,6 +403,10 @@ function getTranslation(language, key) {
 }
 
 function normalizePath(pathname) {
+  if (pathname === '/checkout/complete') {
+    return '/checkout/complete'
+  }
+
   return pages.some((page) => page.path === pathname) ? pathname : '/'
 }
 
@@ -709,6 +721,7 @@ function App() {
     enabled: false,
     publishable_key: null,
     currency: 'aed',
+    return_url: null,
     payment_element: {
       wallets: {
         applePay: 'auto',
@@ -812,6 +825,7 @@ function App() {
           enabled: false,
           publishable_key: null,
           currency: 'aed',
+          return_url: null,
           payment_element: {
             wallets: {
               applePay: 'auto',
@@ -1451,6 +1465,60 @@ function App() {
 
     throw new Error(t('paymentProcessingFail'))
   }
+
+  useEffect(() => {
+    if (path !== '/checkout/complete') {
+      return undefined
+    }
+
+    const sessionId = new URLSearchParams(window.location.search).get('session_id')
+    const pending = readPendingCheckout()
+
+    if (!sessionId) {
+      setNotice(createNotice(t('checkoutSessionMissing'), 'error'))
+      openPage('/')
+      return undefined
+    }
+
+    if (!pending?.orderId) {
+      setNotice(createNotice(t('checkoutSessionMissing'), 'error'))
+      openPage('/')
+      return undefined
+    }
+
+    let active = true
+
+    ;(async () => {
+      try {
+        await waitForPaidOrder(pending.orderId, pending.mobileNumber)
+
+        if (!active) {
+          return
+        }
+
+        clearPendingCheckout()
+
+        if (pending.checkoutData) {
+          await finishOrderSuccess(pending.checkoutData)
+          return
+        }
+
+        setNotice(createNotice(t('orderPlaced'), 'success'))
+        openPage('/')
+      } catch (error) {
+        if (!active) {
+          return
+        }
+
+        setNotice(createNotice(getFirstErrorMessage(error, t('paymentProcessingFail')), 'error'))
+        openPage('/')
+      }
+    })()
+
+    return () => {
+      active = false
+    }
+  }, [path])
 
   const createPendingOrder = async () => {
     if (!validateOrderRequest()) {
@@ -2312,6 +2380,14 @@ function App() {
   )
 
   const renderPageSections = () => {
+    if (path === '/checkout/complete') {
+      return (
+        <CheckoutComplete
+          title={t('completingPayment')}
+          body={t('completingPaymentBody')}
+        />
+      )
+    }
     if (activePage.path === '/menu') {
       return renderMenuSections()
     }
@@ -2328,6 +2404,9 @@ function App() {
   }
 
   const renderHeroSurface = () => {
+    if (path === '/checkout/complete') {
+      return null
+    }
     if (activePage.path === '/') {
       return (
         <section className="hero-surface home-hero home-showcase-surface">
@@ -2407,8 +2486,8 @@ function App() {
   }
 
   return (
-    <main className={`site-shell route-${activePage.path === '/' ? 'home' : activePage.path.slice(1).replaceAll('/', '-')}`} dir={isArabic ? 'rtl' : 'ltr'}>
-      {activePage.path !== '/' ? (
+    <main className={`site-shell route-${path === '/checkout/complete' ? 'checkout-complete' : activePage.path === '/' ? 'home' : activePage.path.slice(1).replaceAll('/', '-')}`} dir={isArabic ? 'rtl' : 'ltr'}>
+      {path !== '/' && path !== '/checkout/complete' ? (
         <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
           <nav aria-label={t('mainNavigation')}>
             {navPages.map((page) => (
