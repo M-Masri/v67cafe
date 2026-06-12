@@ -953,6 +953,7 @@ function OrderNowModal({
                   <StripePaymentStep
                     clientSecret={orderPayment.client_secret}
                     stripePromise={stripePromise}
+                    paymentConfig={paymentConfig}
                     payLabel={payLabel}
                     isPaying={isPaymentBusy}
                     onPayStart={handleStripePayStart}

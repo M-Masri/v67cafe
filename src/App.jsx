@@ -709,6 +709,12 @@ function App() {
     enabled: false,
     publishable_key: null,
     currency: 'aed',
+    payment_element: {
+      wallets: {
+        applePay: 'auto',
+        googlePay: 'auto',
+      },
+    },
   })
   const [modalPendingOrder, setModalPendingOrder] = useState(null)
   const locale = language === 'ar' ? 'ar-AE' : 'en-AE'
@@ -806,6 +812,12 @@ function App() {
           enabled: false,
           publishable_key: null,
           currency: 'aed',
+          payment_element: {
+            wallets: {
+              applePay: 'auto',
+              googlePay: 'auto',
+            },
+          },
         })
       })
       .catch(() => null)
