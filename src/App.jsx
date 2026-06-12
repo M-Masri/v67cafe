@@ -134,7 +134,7 @@ const translations = {
     unavailable: 'Unavailable',
     soldOut: 'Sold Out',
     soldOutTitle: 'Sold out for today',
-    soldOutTomorrow: 'See you tomorrow',
+    soldOutTomorrow: 'See you tomorrow!',
     orderNow: 'Order Now',
     notification: 'Notification',
     noticeTitleSuccess: 'Done',
@@ -155,7 +155,8 @@ const translations = {
     cafeHighlightsCta: 'Cafe highlights under order button',
     dailyCupProgress: 'Daily cup progress',
     cupsSoldOutToday: 'cups sold out today',
-    cupsServedToday: 'cups served today',
+    cupsServedToday: 'How far are we?',
+    loadingDailyCount: 'Loading today\'s cup count',
     allRightsReserved: 'All rights reserved.',
     shopMenu: 'Shop menu',
     noProductsYet: 'No drinks are available yet.',
@@ -265,7 +266,7 @@ const translations = {
     unavailable: 'غير متوفر',
     soldOut: 'خلصت الكمية',
     soldOutTitle: 'خلصت الكمية',
-    soldOutTomorrow: 'حياك باجر',
+    soldOutTomorrow: 'حياك باجر !',
     orderNow: 'اطلب الحين',
     notification: 'تنبيه',
     noticeTitleSuccess: 'تم بنجاح',
@@ -287,6 +288,7 @@ const translations = {
     dailyCupProgress: 'تقدم أكواب اليوم',
     cupsSoldOutToday: 'انتهت أكواب اليوم',
     cupsServedToday: 'كم واصلين اليوم',
+    loadingDailyCount: 'جاري تحميل عدد الأكواب',
     allRightsReserved: 'جميع الحقوق محفوظة.',
     shopMenu: 'منيو الطلب',
     noProductsYet: 'للحين ما فيه مشروبات متاحة.',
@@ -1616,19 +1618,31 @@ function App() {
             itemKeyPrefix="top-"
           />
 
-          <div className="daily-count-display" aria-label={t('dailyCupProgress')}>
-            <span>{isDailyLimitReady && soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
-            <strong aria-busy={!isDailyLimitReady}>
-              {isDailyLimitReady ? (
-                soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`
-              ) : (
-                <span
-                  className="daily-count-loader order-payment-spinner"
-                  role="status"
-                  aria-label={t('dailyCupProgress')}
-                />
-              )}
-            </strong>
+          <div
+            className={`daily-count-display${!isDailyLimitReady ? ' is-loading' : ''}${soldOut ? ' is-sold-out' : ''}`}
+            aria-label={soldOut ? `${t('soldOutTitle')}, ${t('soldOutTomorrow')}` : t('dailyCupProgress')}
+          >
+            {soldOut ? (
+              <>
+                <span>{t('soldOutTitle')}, {t('soldOutTomorrow')}</span>
+                <strong>{`${cupLimit}/${cupLimit}`}</strong>
+              </>
+            ) : (
+              <>
+                <span>{t('cupsServedToday')}</span>
+                <strong aria-busy={!isDailyLimitReady}>
+                  {isDailyLimitReady ? (
+                    `${orderedCount}/${cupLimit}`
+                  ) : (
+                    <span className="daily-count-skeleton" role="status" aria-label={t('loadingDailyCount')}>
+                      <span className="daily-count-skeleton-part daily-count-skeleton-part--count shimmer" aria-hidden="true" />
+                      <span className="daily-count-skeleton-slash" aria-hidden="true">/</span>
+                      <span className="daily-count-skeleton-part daily-count-skeleton-part--limit shimmer" aria-hidden="true" />
+                    </span>
+                  )}
+                </strong>
+              </>
+            )}
           </div>
 
           <div className="hero-cta-row">
@@ -1638,12 +1652,7 @@ function App() {
               disabled={isOrderingDisabled}
               onClick={() => openOrderModal(1)}
             >
-              {soldOut ? (
-                <span className="hero-primary-button-copy">
-                  <span>{t('soldOutTitle')}</span>
-                  <small>{t('soldOutTomorrow')}</small>
-                </span>
-              ) : t('orderNow')}
+              {t('orderNow')}
             </button>
           </div>
 

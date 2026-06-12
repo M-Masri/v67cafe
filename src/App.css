@@ -764,12 +764,6 @@ body {
   align-items: center;
 }
 
-.route-home .daily-count-loader {
-  width: clamp(2rem, 3.2vw, 3rem);
-  height: clamp(2rem, 3.2vw, 3rem);
-  border-width: 4px;
-}
-
 .route-home .daily-count-display span {
   max-width: none;
   text-align: left;
@@ -781,6 +775,12 @@ body {
   letter-spacing: normal;
   text-transform: none;
   line-height: 0.95;
+}
+
+.route-home .daily-count-display.is-sold-out span {
+  font-size: clamp(1.5rem, 2.4vw, 1.92rem);
+  line-height: 1.15;
+  white-space: nowrap;
 }
 
 .route-home .hero-cta-row {
@@ -1007,9 +1007,37 @@ body {
   text-align: center;
 }
 
-.daily-count-loader {
-  display: inline-block;
-  vertical-align: middle;
+.daily-count-display.is-loading span {
+  opacity: 0.72;
+}
+
+.daily-count-skeleton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28em;
+}
+
+.daily-count-skeleton-part {
+  display: block;
+  height: clamp(2rem, 3.4vw, 3.4rem);
+  border-radius: 14px;
+  background: rgba(0, 127, 130, 0.12);
+}
+
+.daily-count-skeleton-part--count {
+  width: clamp(2.1rem, 4.8vw, 3rem);
+}
+
+.daily-count-skeleton-part--limit {
+  width: clamp(2.5rem, 5.4vw, 3.4rem);
+}
+
+.daily-count-skeleton-slash {
+  color: rgba(0, 127, 130, 0.34);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 3.6vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1;
 }
 
 .daily-count-display strong {
