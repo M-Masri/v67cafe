@@ -32,6 +32,7 @@ import OrderNowModal from './components/OrderNowModal'
 import HeroIconMarquee from './components/HeroIconMarquee'
 import { requestJson } from './config/api'
 import { loadCatalog } from './lib/catalog'
+import { getProductImageUrl } from './lib/media'
 import { getStripe } from './lib/stripe'
 const homeHeroLogo = '/v67_logo_C64429.webp'
 const fallbackHero = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1800&q=85'
@@ -1586,7 +1587,7 @@ function App() {
             : products.map((product, index) => (
               <article className="shop-card" key={product.id}>
                 <img
-                  src={product.image_url || fallbackImages[index % fallbackImages.length]}
+                  src={getProductImageUrl(product, fallbackImages[index % fallbackImages.length])}
                   alt={product.name}
                 />
                 <div>

@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { GlassWater, Minus, Package, Plus, Trash2, X } from 'lucide-react'
+import { GlassWater, Minus, Package, Plus, X } from 'lucide-react'
 import ReactPhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import StripePaymentStep from './StripePaymentStep'
+import { getProductImageUrl } from '../lib/media'
 import { getStripe } from '../lib/stripe'
 
 const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
@@ -276,7 +277,7 @@ function isValidInternationalPhone(value) {
   return /^\+\d{8,15}$/.test(String(value || ''))
 }
 
-function getProductIconSrc(product) {
+function getProductCategoryIconSrc(product) {
   const slug = String(product.category?.slug || '').toLowerCase()
   const label = `${product.name || ''} ${product.category?.name || ''}`.toLowerCase()
 
@@ -297,6 +298,35 @@ function getProductIconSrc(product) {
   }
 
   return '/coffee-beans.svg'
+}
+
+function OrderProductImage({ product, fallbackSrc }) {
+  const imageUrl = getProductImageUrl(product, fallbackSrc)
+  const [useFallbackIcon, setUseFallbackIcon] = useState(!imageUrl)
+
+  useEffect(() => {
+    setUseFallbackIcon(!imageUrl)
+  }, [imageUrl])
+
+  if (!useFallbackIcon && imageUrl) {
+    return (
+      <img
+        src={imageUrl}
+        alt=""
+        className="order-product-thumb"
+        loading="lazy"
+        onError={() => setUseFallbackIcon(true)}
+      />
+    )
+  }
+
+  return (
+    <span
+      className="order-product-thumb order-product-thumb-icon"
+      style={{ '--icon-url': `url(${getProductCategoryIconSrc(product)})` }}
+      aria-hidden="true"
+    />
+  )
 }
 
 function BrandLogo({ logo, name, className = '' }) {
@@ -638,30 +668,28 @@ function OrderNowModal({
                 </div>
               </div>
 
-              <div className="order-product-list">
+              <div className="order-product-catalog" dir="ltr">
                 {isCatalogLoading && products.length === 0 ? (
                   <p className="order-modal-loading-copy">{t('loadingMenu')}</p>
                 ) : null}
-                {products.map((product) => {
+                {products.map((product, index) => {
                   const cartItem = cartItems.find((item) => item.product_id === product.id)
                   const quantity = cartItem?.quantity || 0
+                  const isUnavailable = soldOut || !product.is_available
 
                   return (
-                    <article className="order-product-card" key={product.id}>
-                      <div className="order-product-head">
-                        <div className="order-product-title-row">
-                          <span
-                            className="order-product-icon order-product-icon-mask"
-                            style={{ '--icon-url': `url(${getProductIconSrc(product)})` }}
-                            aria-hidden="true"
-                          />
-                          <strong>{product.name}</strong>
-                        </div>
+                    <article className="order-product-row" key={product.id}>
+                      <OrderProductImage
+                        product={product}
+                        fallbackSrc={fallbackImages[index % fallbackImages.length]}
+                      />
+                      <div className="order-product-copy">
+                        <strong className="order-product-name">{product.name}</strong>
                         <span className="order-product-price">{money(product.price)}</span>
                       </div>
                       <div className="order-product-actions">
                         {quantity > 0 ? (
-                          <div className="quantity-controls">
+                          <div className="quantity-controls order-catalog-quantity">
                             <button
                               type="button"
                               onClick={() => setQuantity(product.id, quantity - 1)}
@@ -673,23 +701,17 @@ function OrderNowModal({
                             <button
                               type="button"
                               onClick={() => setQuantity(product.id, quantity + 1)}
+                              disabled={isUnavailable}
                               aria-label={`${t('increase')} ${product.name}`}
                             >
                               <Plus size={14} />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setQuantity(product.id, 0)}
-                              aria-label={`${t('remove')} ${product.name}`}
-                            >
-                              <Trash2 size={14} />
                             </button>
                           </div>
                         ) : (
                           <button
                             type="button"
                             className="order-product-add"
-                            disabled={soldOut || !product.is_available}
+                            disabled={isUnavailable}
                             onClick={() => addToCart(product)}
                           >
                             {product.is_available ? t('add') : t('unavailable')}
