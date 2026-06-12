@@ -31,6 +31,7 @@ import fallbackLogo from './assets/v67-logo.svg'
 import OrderNowModal from './components/OrderNowModal'
 import HeroIconMarquee from './components/HeroIconMarquee'
 import { requestJson } from './config/api'
+import { loadCatalog } from './lib/catalog'
 import { getStripe } from './lib/stripe'
 const homeHeroLogo = '/v67_logo_C64429.webp'
 const fallbackHero = 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1800&q=85'
@@ -747,17 +748,10 @@ function App() {
   useEffect(() => {
     let active = true
     let hasLoadedOnce = false
-    let isRefreshing = false
 
     const refreshCatalog = async ({ showErrorNotice = false } = {}) => {
-      if (isRefreshing) {
-        return
-      }
-
-      isRefreshing = true
-
       try {
-        const data = await requestJson('/catalog', {}, null)
+        const data = await loadCatalog()
 
         if (!active) {
           return
@@ -770,8 +764,6 @@ function App() {
           setNotice(createNotice(error.message, 'error'))
         }
       } finally {
-        isRefreshing = false
-
         if (active) {
           setIsCatalogLoading(false)
         }
@@ -781,8 +773,18 @@ function App() {
     refreshCatalog({ showErrorNotice: true })
 
     const interval = window.setInterval(() => {
-      refreshCatalog({ showErrorNotice: !hasLoadedOnce })
-    }, 2000)
+      if (!hasLoadedOnce) {
+        return
+      }
+
+      loadCatalog({ force: true })
+        .then((data) => {
+          if (active) {
+            setCatalog(data)
+          }
+        })
+        .catch(() => null)
+    }, 30000)
 
     return () => {
       active = false
@@ -950,6 +952,13 @@ function App() {
     }
   }, [activePage.subtitle, activePage.title, banner.background_image_url, banner.description, banner.title])
   const products = useMemo(() => {
+    if (catalog?.products?.length) {
+      return catalog.products
+    }
+
+    return fallbackProducts
+  }, [catalog])
+  const orderModalProducts = useMemo(() => {
     if (catalog?.products?.length) {
       return catalog.products
     }
@@ -2461,7 +2470,8 @@ function App() {
         isOpen={orderModalOpen}
         onClose={closeOrderModal}
         initialStep={orderModalInitialStep}
-        products={products}
+        products={orderModalProducts}
+        isCatalogLoading={isCatalogLoading}
         fallbackImages={fallbackImages}
         cartItems={cartItems}
         cartCups={cartCups}

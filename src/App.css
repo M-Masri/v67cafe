@@ -576,15 +576,16 @@ body {
 
 .marquee__wrapper {
   --marquee-item-gap: 28px;
-  --marquee-duration: 8s;
+  --marquee-duration: 28s;
   --marquee-icon-size: 64px;
   width: min(920px, 100%);
   display: block;
   position: relative;
   overflow: hidden;
   padding: 8px 0;
-  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-  min-height: calc(var(--marquee-icon-size) + 16px);
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+  height: calc(var(--marquee-icon-size) + 16px);
+  margin-inline: auto;
 }
 
 .marquee__wrapper:not(.marquee__wrapper--reverse) {
@@ -622,7 +623,7 @@ body {
   animation-name: heroMarqueeCloneReverse;
 }
 
-.marquee__repeated-items {
+.marquee__segment {
   display: flex;
   flex: 0 0 auto;
   align-items: center;
@@ -2754,7 +2755,7 @@ button:disabled {
   }
 
   .marquee__wrapper {
-    width: 125%;
+    width: 100%;
   }
 
   .marquee__wrapper:not(.marquee__wrapper--reverse) {

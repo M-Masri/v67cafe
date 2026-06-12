@@ -40,6 +40,7 @@ const modalTranslations = {
     phoneNumber: 'Your phone number',
     validPhone: 'Enter a valid phone number with country code.',
     checkingLoyalty: 'Checking loyalty status...',
+    loadingMenu: 'Loading menu...',
     useReward: 'Use free cup reward ({count} available)',
     freeCupsToUse: 'Free cups to use',
     paymentWiring: 'Pay securely with card or Apple Pay',
@@ -92,6 +93,7 @@ const modalTranslations = {
     phoneNumber: 'رقم تلفونك',
     validPhone: 'اكتب رقم جوال صحيح مع مفتاح الدولة.',
     checkingLoyalty: 'جاري التحقق من الولاء...',
+    loadingMenu: 'جاري تحميل القائمة...',
     useReward: 'استخدم مكافأة كوب مجاني ({count} متاح)',
     freeCupsToUse: 'عدد الأكواب المجانية',
     paymentWiring: 'ادفع بأمان بالبطاقة أو Apple Pay',
@@ -343,6 +345,7 @@ function OrderNowModal({
   onClose,
   initialStep,
   products,
+  isCatalogLoading = false,
   fallbackImages,
   cartItems,
   cartCups,
@@ -636,6 +639,9 @@ function OrderNowModal({
               </div>
 
               <div className="order-product-list">
+                {isCatalogLoading && products.length === 0 ? (
+                  <p className="order-modal-loading-copy">{t('loadingMenu')}</p>
+                ) : null}
                 {products.map((product) => {
                   const cartItem = cartItems.find((item) => item.product_id === product.id)
                   const quantity = cartItem?.quantity || 0
