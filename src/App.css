@@ -759,6 +759,15 @@ body {
   color: #007F82;
   text-shadow: none;
   font-size: clamp(2.4rem, 3.6vw, 4.2rem);
+  min-height: clamp(2.4rem, 3.6vw, 4.2rem);
+  display: inline-flex;
+  align-items: center;
+}
+
+.route-home .daily-count-loader {
+  width: clamp(2rem, 3.2vw, 3rem);
+  height: clamp(2rem, 3.2vw, 3rem);
+  border-width: 4px;
 }
 
 .route-home .daily-count-display span {
@@ -794,6 +803,19 @@ body {
   background: transparent;
   color: var(--hero-color-c);
   box-shadow: none;
+}
+
+.hero-primary-button-copy {
+  display: grid;
+  gap: 2px;
+  line-height: 1.1;
+}
+
+.hero-primary-button-copy small {
+  font-size: 0.78em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  opacity: 0.92;
 }
 
 .route-home .hero-secondary-button {
@@ -983,6 +1005,11 @@ body {
   gap: 12px;
   color: #3f2618;
   text-align: center;
+}
+
+.daily-count-loader {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .daily-count-display strong {

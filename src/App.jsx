@@ -133,6 +133,8 @@ const translations = {
     addToCart: 'Add to cart',
     unavailable: 'Unavailable',
     soldOut: 'Sold Out',
+    soldOutTitle: 'Sold out for today',
+    soldOutTomorrow: 'See you tomorrow',
     orderNow: 'Order Now',
     notification: 'Notification',
     noticeTitleSuccess: 'Done',
@@ -262,6 +264,8 @@ const translations = {
     addToCart: 'ضيف للسلة',
     unavailable: 'غير متوفر',
     soldOut: 'خلصت الكمية',
+    soldOutTitle: 'خلصت الكمية',
+    soldOutTomorrow: 'حياك باجر',
     orderNow: 'اطلب الحين',
     notification: 'تنبيه',
     noticeTitleSuccess: 'تم بنجاح',
@@ -996,15 +1000,18 @@ function App() {
     () => (catalog?.categories?.length ? catalog.categories : fallbackCategories),
     [catalog],
   )
-  const dailyLimit = catalog?.daily_limit || {
-    accepted_cups: 0,
-    remaining_cups: 99,
-    limit: 99,
-    sold_out: false,
-  }
-  const soldOut = dailyLimit.sold_out
-  const orderedCount = Number.isFinite(Number(dailyLimit.accepted_cups)) ? Number(dailyLimit.accepted_cups) : 0
-  const cupLimit = Number.isFinite(Number(dailyLimit.limit)) ? Number(dailyLimit.limit) : 99
+  const isDailyLimitReady = Boolean(catalog?.daily_limit) && !isCatalogLoading
+  const dailyLimit = catalog?.daily_limit
+  const orderedCount = isDailyLimitReady && Number.isFinite(Number(dailyLimit.accepted_cups))
+    ? Number(dailyLimit.accepted_cups)
+    : 0
+  const cupLimit = isDailyLimitReady && Number.isFinite(Number(dailyLimit.limit))
+    ? Number(dailyLimit.limit)
+    : 99
+  const soldOut = isDailyLimitReady && (
+    Boolean(dailyLimit.sold_out) || orderedCount >= cupLimit
+  )
+  const isOrderingDisabled = !isDailyLimitReady || soldOut
   const phoneDigits = String(settings.phone || '').replace(/[^\d+]/g, '')
   const socialLinks = {
     call: phoneDigits ? `tel:${phoneDigits}` : '#',
@@ -1134,6 +1141,10 @@ function App() {
   }
 
   const openOrderModal = (step = 1) => {
+    if (isOrderingDisabled) {
+      return
+    }
+
     setOrderModalInitialStep(step)
     setCartOpen(false)
     setOrderModalOpen(true)
@@ -1145,7 +1156,7 @@ function App() {
   }
 
   const addToCart = (product) => {
-    if (soldOut || !product.is_available) {
+    if (isOrderingDisabled || !product.is_available) {
       return
     }
 
@@ -1398,6 +1409,11 @@ function App() {
   }
 
   const validateOrderRequest = () => {
+    if (!isDailyLimitReady || soldOut) {
+      setNotice(createNotice(t('soldOutTitle'), 'error'))
+      return false
+    }
+
     if (cartItems.length === 0) {
       setNotice(createNotice(t('cartEmpty'), 'error'))
       return false
@@ -1601,18 +1617,33 @@ function App() {
           />
 
           <div className="daily-count-display" aria-label={t('dailyCupProgress')}>
-            <span>{soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
-            <strong>{soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`}</strong>
+            <span>{isDailyLimitReady && soldOut ? t('cupsSoldOutToday') : t('cupsServedToday')}</span>
+            <strong aria-busy={!isDailyLimitReady}>
+              {isDailyLimitReady ? (
+                soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`
+              ) : (
+                <span
+                  className="daily-count-loader order-payment-spinner"
+                  role="status"
+                  aria-label={t('dailyCupProgress')}
+                />
+              )}
+            </strong>
           </div>
 
           <div className="hero-cta-row">
             <button
               className="hero-primary-button"
               type="button"
-              disabled={soldOut}
+              disabled={isOrderingDisabled}
               onClick={() => openOrderModal(1)}
             >
-              {soldOut ? t('soldOut') : t('orderNow')}
+              {soldOut ? (
+                <span className="hero-primary-button-copy">
+                  <span>{t('soldOutTitle')}</span>
+                  <small>{t('soldOutTomorrow')}</small>
+                </span>
+              ) : t('orderNow')}
             </button>
           </div>
 
@@ -1678,7 +1709,7 @@ function App() {
                     <strong>{money(product.price, locale)}</strong>
                     <button
                       type="button"
-                      disabled={soldOut || !product.is_available}
+                      disabled={isOrderingDisabled || !product.is_available}
                       onClick={() => addToCart(product)}
                     >
                       {t('addToCart')}
@@ -1865,7 +1896,7 @@ function App() {
             }
           />
         </label>
-        <button type="submit" disabled={cartItems.length === 0 || soldOut || !isCheckoutPhoneValid}>
+        <button type="submit" disabled={cartItems.length === 0 || isOrderingDisabled || !isCheckoutPhoneValid}>
           {t('placeOrder')}
         </button>
       </form>
@@ -2570,7 +2601,7 @@ function App() {
         cartTotal={cartTotal}
         orderedCount={orderedCount}
         cupLimit={cupLimit}
-        soldOut={soldOut}
+        soldOut={isOrderingDisabled}
         money={(value) => money(value, locale)}
         addToCart={addToCart}
         setQuantity={setQuantity}
@@ -2633,7 +2664,7 @@ function App() {
         <button
           className="checkout-link"
           type="button"
-          disabled={cartItems.length === 0}
+          disabled={cartItems.length === 0 || isOrderingDisabled}
           onClick={() => openOrderModal(2)}
         >
           {t('goToCheckout')}
