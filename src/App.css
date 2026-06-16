@@ -798,8 +798,8 @@ body {
 .route-home .daily-count-display strong {
   color: #007f82;
   text-shadow: none;
-  font-size: clamp(3.2rem, 5.4vw, 5.8rem);
-  min-height: clamp(3.2rem, 5.4vw, 5.8rem);
+  font-size: clamp(2.2rem, 5.4vw, 4.8rem);
+  min-height: clamp(2.2rem, 5.4vw, 4.8rem);
   display: inline-flex;
   align-items: center;
   margin-bottom: 6px;
@@ -1099,7 +1099,7 @@ body {
 
 .daily-count-skeleton-part {
   display: block;
-  height: clamp(2rem, 3.4vw, 3.4rem);
+  height: clamp(1rem, 3.4vw, 2.4rem);
   border-radius: 14px;
   background: rgba(0, 127, 130, 0.12);
 }
@@ -1115,18 +1115,18 @@ body {
 .daily-count-skeleton-slash {
   color: rgba(0, 127, 130, 0.34);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 3.6vw, 4.2rem);
+  font-size: clamp(1rem, 3.6vw, 3.2rem);
   font-weight: 700;
   line-height: 1;
 }
 
 .daily-count-display strong {
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(2rem, 4.3vw, 3.85rem);
+  font-size: clamp(1rem, 4.3vw, 2.85rem);
   font-weight: 700;
   line-height: 0.95;
   text-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
-  font-size: 80px;
+  font-size: 64px;
 }
 
 .daily-count-display span {
@@ -2865,6 +2865,19 @@ button:disabled {
     text-align: center;
   }
 
+  .route-home .daily-count-display strong {
+    font-size: clamp(2rem, 4.8vw, 3.2rem);
+    min-height: 0;
+  }
+
+  .route-home .daily-count-skeleton-part {
+    height: clamp(0.85rem, 2.8vw, 1.6rem);
+  }
+
+  .route-home .daily-count-skeleton-slash {
+    font-size: clamp(0.85rem, 2.8vw, 1.6rem);
+  }
+
   .home-showcase-footer,
   .home-floating-tags,
   .home-bottom-signoff {
@@ -3053,8 +3066,25 @@ button:disabled {
   }
 
   .route-home .daily-count-display strong {
-    font-size: clamp(4.8rem, 22vw, 6.4rem);
-    line-height: 0.9;
+    font-size: clamp(1.9rem, 9vw, 2.6rem);
+    min-height: 0;
+    line-height: 0.95;
+  }
+
+  .route-home .daily-count-skeleton-part {
+    height: clamp(0.75rem, 2.4vw, 1.35rem);
+  }
+
+  .route-home .daily-count-skeleton-part--count {
+    width: clamp(1.4rem, 3.6vw, 2rem);
+  }
+
+  .route-home .daily-count-skeleton-part--limit {
+    width: clamp(1.7rem, 4vw, 2.3rem);
+  }
+
+  .route-home .daily-count-skeleton-slash {
+    font-size: clamp(0.75rem, 2.4vw, 1.35rem);
   }
 
   .route-home .daily-count-display span {
@@ -3319,7 +3349,7 @@ button:disabled {
 .order-modal-counter strong {
   color: #007f82;
   text-shadow: none;
-  font-size: clamp(4.8rem, 8.5vw, 6.8rem);
+  font-size: clamp(3.8rem, 8.5vw, 5.8rem);
   margin-bottom: 4px;
 }
 
@@ -4245,7 +4275,7 @@ button:disabled {
   }
 
   .order-modal-counter strong {
-    font-size: clamp(3.6rem, 20vw, 5.4rem);
+    font-size: clamp(1.9rem, 8.5vw, 2.75rem);
   }
 
   .order-modal-counter span {
@@ -4377,7 +4407,7 @@ button:disabled {
   }
 
   .order-modal-counter strong {
-    font-size: clamp(3.2rem, 19vw, 4.4rem);
+    font-size: clamp(1.65rem, 7.5vw, 2.25rem);
   }
 
   .order-modal-counter span {
