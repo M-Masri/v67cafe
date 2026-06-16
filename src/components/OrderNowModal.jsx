@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { GlassWater, Minus, Package, Plus, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, GlassWater, Minus, Package, Plus, X } from 'lucide-react'
 import ReactPhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import StripePaymentStep from './StripePaymentStep'
@@ -21,7 +21,7 @@ const modalTranslations = {
     selectProducts: 'Select products',
     chooseFromMenu: 'Choose from the current menu',
     cupsServedToday: 'How far are we?',
-    iceV60Only: 'ice v60 only',
+    iceV60Only: 'ICE V\'60',
     cups: 'cups',
     drink: 'Drink',
     decrease: 'Decrease',
@@ -60,7 +60,8 @@ const modalTranslations = {
     totalAmount: 'Total amount',
     back: 'Back',
     continueCheckout: 'Continue to checkout',
-    continuePayment: 'Continue to payment',
+    continuePayment: 'Continue and complete order',
+    continueWithTotal: 'Continue and complete order · {total}',
     placeOrder: 'Place order',
   },
   ar: {
@@ -74,7 +75,7 @@ const modalTranslations = {
     selectProducts: 'اختر المنتجات',
     chooseFromMenu: 'شو خاطرك اليوم؟',
     cupsServedToday: 'كم واصلين اليوم',
-    iceV60Only: 'ice v60 only',
+    iceV60Only: 'ICE V\'60',
     cups: 'كوب',
     drink: 'مشروب',
     decrease: 'تقليل',
@@ -113,7 +114,8 @@ const modalTranslations = {
     totalAmount: 'الإجمالي',
     back: 'رجوع',
     continueCheckout: 'كمل طلبك',
-    continuePayment: 'ادفع الحين',
+    continuePayment: 'متابعة واكمال الطلب',
+    continueWithTotal: 'متابعة واكمال الطلب · {total}',
     placeOrder: 'تأكيد الطلب',
   },
 }
@@ -388,6 +390,7 @@ function OrderNowModal({
   orderedCount,
   cupLimit,
   soldOut,
+  cafeName = 'Cafe 67',
   money,
   addToCart,
   setQuantity,
@@ -416,7 +419,7 @@ function OrderNowModal({
       return undefined
     }
 
-    setStep(initialStep)
+    setStep(pendingOrderData?.payment?.client_secret ? 2 : 1)
 
     if (!pendingOrderData) {
       setPendingCheckout(null)
@@ -434,7 +437,7 @@ function OrderNowModal({
     }
 
     setPendingCheckout(pendingOrderData)
-    setStep(3)
+    setStep(2)
 
     return undefined
   }, [isOpen, pendingOrderData])
@@ -468,8 +471,7 @@ function OrderNowModal({
     [userAddresses],
   )
   const isCheckoutPhoneValid = isValidUaePhone(checkoutForm.customer_phone)
-  const canContinueFromProducts = cartCups > 0 && !soldOut
-  const canContinueFromCheckout = isCheckoutPhoneValid
+  const canPlaceOrder = cartCups > 0 && !soldOut && isCheckoutPhoneValid
   const checkoutContact = useMemo(
     () => ({
       email: resolveCheckoutEmail({
@@ -524,7 +526,7 @@ function OrderNowModal({
       }
 
       setPendingCheckout(data)
-      setStep(3)
+      setStep(2)
     } catch (error) {
       setPaymentError(error.message || t('paymentFailed'))
     } finally {
@@ -557,6 +559,22 @@ function OrderNowModal({
     setPaymentPhase('idle')
     setPaymentError(message || t('paymentFailed'))
   }
+
+  const handlePaymentBack = () => {
+    setStep(1)
+    setPendingCheckout(null)
+    setPaymentError('')
+    setPaymentPhase('idle')
+    setIsCreatingOrder(false)
+  }
+
+  const paymentOrderItems = useMemo(
+    () => cartItems.map((item, index) => ({
+      ...item,
+      fallbackSrc: fallbackImages[index % fallbackImages.length],
+    })),
+    [cartItems, fallbackImages],
+  )
   const loyaltyData = loyaltyState?.data
   const remainingCups = Number(loyaltyData?.remaining_cups || 0)
   const loyaltyMessage = language === 'ar'
@@ -581,8 +599,13 @@ function OrderNowModal({
     || loyaltyMessage
     || hasFreeReward
   )
-  const stepLabels = [t('products'), t('checkout'), t('payment')]
   const dailyCounterValue = soldOut ? `${cupLimit}/${cupLimit}` : `${orderedCount}/${cupLimit}`
+  const orderTotalLabel = formatPayAmount(cartTotal, language)
+  const continueButtonLabel = isCreatingOrder
+    ? t('creatingOrder')
+    : cartCups > 0
+      ? t('continueWithTotal').replace('{total}', orderTotalLabel)
+      : t('continuePayment')
 
   useEffect(() => {
     if (!isOpen) {
@@ -631,57 +654,36 @@ function OrderNowModal({
         className="order-modal"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="order-modal-title"
+        aria-label={t('orderNow')}
         onClick={(event) => event.stopPropagation()}
       >
-        <header className="order-modal-header">
-          <div>
-            <p className="order-modal-kicker">{t('orderNow')}</p>
-            <h2 id="order-modal-title">{t('buildOrder')}</h2>
-          </div>
-          <button type="button" className="order-modal-close" onClick={onClose} aria-label={t('closePopup')}>
-            <X size={18} />
-          </button>
-        </header>
-
-        <div className="order-modal-steps" aria-label={t('orderSteps')}>
-          {stepLabels.map((label, index) => (
+        <header className={`order-modal-header order-modal-header--compact${step === 2 ? ' is-payment' : ''}`}>
+          {step === 2 ? (
             <button
-              key={label}
               type="button"
-              className={`order-step-pill ${step === index + 1 ? 'active' : ''} ${step > index + 1 ? 'done' : ''} ${index < 2 ? 'clickable' : ''}`}
-              onClick={() => {
-                if (index === 0 || (index === 1 && canContinueFromProducts)) {
-                  setStep(index + 1)
-                }
-              }}
-              disabled={index > 1 || (index === 1 && !canContinueFromProducts)}
+              className="order-modal-back"
+              onClick={handlePaymentBack}
+              aria-label={t('back')}
             >
-              <div className="order-step-line" aria-hidden="true" />
-              <span className="order-step-count">{index + 1}</span>
-              <strong>{label}</strong>
+              {language === 'ar' ? <ArrowRight size={18} /> : <ArrowLeft size={18} />}
             </button>
-          ))}
-        </div>
+          ) : (
+            <button type="button" className="order-modal-close" onClick={onClose} aria-label={t('closePopup')}>
+              <X size={18} />
+            </button>
+          )}
+        </header>
 
         <div className="order-modal-body">
           {step === 1 ? (
-            <div className="order-modal-panel">
+            <div className="order-modal-panel order-modal-order-panel">
               <div className="daily-count-display order-modal-counter" aria-label={t('cupsServedToday')}>
                 <span>{t('cupsServedToday')}</span>
                 <strong>{dailyCounterValue}</strong>
-                <span className="order-modal-counter-note">{t('iceV60Only')}</span>
-              </div>
-
-              <div className="order-modal-section-heading">
-                <div>
-                  <p>{t('selectProducts')}</p>
-                  <h3>{t('chooseFromMenu')}</h3>
-                </div>
-                <div className="order-modal-summary-chip">
-                  <span>{cartCups} {t('cups')}</span>
-                  <strong>{money(cartTotal)}</strong>
-                </div>
+                <span className="order-modal-counter-note">
+                  <img src="/ice-cubes.png" alt="" aria-hidden="true" className="order-modal-ice-icon" />
+                  {t('iceV60Only')}
+                </span>
               </div>
 
               <div className="order-product-catalog" dir="ltr">
@@ -738,11 +740,7 @@ function OrderNowModal({
                   )
                 })}
               </div>
-            </div>
-          ) : null}
 
-          {step === 2 ? (
-            <div className="order-modal-panel order-modal-checkout-panel">
               {hasSavedAddresses ? (
                 <div className="saved-address-picker order-modal-address-picker">
                   <span>{t('savedAddresses')}</span>
@@ -926,30 +924,33 @@ function OrderNowModal({
             </div>
           ) : null}
 
-          {step === 3 ? (
+          {step === 2 ? (
             <div className="order-modal-panel order-modal-payment-panel">
-              <div className="order-modal-section-heading">
-                <div>
-                  <p>{t('payment')}</p>
-                  <h3>{t('paymentWiring')}</h3>
-                </div>
-              </div>
+              <div className="order-payment-hero">
+                <p className="order-payment-hero-brand">{cafeName}</p>
 
-              {pendingOrder?.order_number ? (
-                <p className="order-payment-order-number">
-                  {t('orderNumber')}: <strong>{pendingOrder.order_number}</strong>
+                <div className="order-payment-items">
+                  {paymentOrderItems.map((item) => (
+                    <div className="order-payment-item" key={item.product_id}>
+                      <div className="order-payment-item-thumb">
+                        <OrderProductImage
+                          product={item.product}
+                          fallbackSrc={item.fallbackSrc}
+                        />
+                      </div>
+                      <p className="order-payment-item-name">
+                        {item.product.name}
+                        {item.quantity > 1 ? ` x${item.quantity}` : ''}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="order-payment-hero-total">{payAmountLabel}</p>
+                <p className="order-payment-hero-line">
+                  <img src="/ice-cubes.png" alt="" aria-hidden="true" className="order-modal-ice-icon" />
+                  {t('iceV60Only')}
                 </p>
-              ) : null}
-
-              <div className="order-payment-summary">
-                <div>
-                  <span>{t('totalCups')}</span>
-                  <strong>{cartCups}</strong>
-                </div>
-                <div>
-                  <span>{t('totalAmount')}</span>
-                  <strong>{money(orderTotal)}</strong>
-                </div>
               </div>
 
               {isPaymentBusy ? (
@@ -991,30 +992,15 @@ function OrderNowModal({
           ) : null}
         </div>
 
-        <footer className={`order-modal-footer single-action${step === 3 ? ' payment-step' : ''}`}>
-          {step < 3 ? (
+        <footer className={`order-modal-footer single-action${step === 2 ? ' payment-step' : ''}`}>
+          {step === 1 ? (
             <button
               type="button"
               className="order-modal-primary"
-              disabled={
-                step === 1
-                  ? !canContinueFromProducts
-                  : !canContinueFromCheckout || isCreatingOrder
-              }
-              onClick={() => {
-                if (step === 1) {
-                  setStep(2)
-                  return
-                }
-
-                handleContinueToPayment()
-              }}
+              disabled={!canPlaceOrder || isCreatingOrder}
+              onClick={handleContinueToPayment}
             >
-              {step === 1
-                ? t('continueCheckout')
-                : isCreatingOrder
-                  ? t('creatingOrder')
-                  : t('continuePayment')}
+              {continueButtonLabel}
             </button>
           ) : null}
         </footer>

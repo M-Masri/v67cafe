@@ -157,7 +157,8 @@ const translations = {
     cupsSoldOutToday: 'cups sold out today',
     cupsServedToday: 'How far are we?',
     loadingDailyCount: 'Loading today\'s cup count',
-    allRightsReserved: 'All rights reserved.',
+    footerTagline: 'ONLY ICE V\'60',
+    footerSubline: 'Come early, we don\'t make more',
     shopMenu: 'Shop menu',
     noProductsYet: 'No drinks are available yet.',
     cartItems: 'Cart items',
@@ -289,7 +290,8 @@ const translations = {
     cupsSoldOutToday: 'انتهت أكواب اليوم',
     cupsServedToday: 'كم واصلين اليوم',
     loadingDailyCount: 'جاري تحميل عدد الأكواب',
-    allRightsReserved: 'جميع الحقوق محفوظة.',
+    footerTagline: 'بس ICE V\'60',
+    footerSubline: 'تعال بدري، ما نزيد',
     shopMenu: 'منيو الطلب',
     noProductsYet: 'للحين ما فيه مشروبات متاحة.',
     cartItems: 'عناصر السلة',
@@ -1444,7 +1446,20 @@ function App() {
     setCart([])
     setOrderModalOpen(false)
     setModalPendingOrder(null)
-    setCatalog((current) => ({ ...current, daily_limit: data.daily_limit }))
+
+    try {
+      const freshCatalog = await loadCatalog({ force: true })
+      setCatalog(freshCatalog)
+    } catch {
+      if (data?.daily_limit) {
+        setCatalog((current) => (
+          current
+            ? { ...current, daily_limit: data.daily_limit }
+            : { daily_limit: data.daily_limit }
+        ))
+      }
+    }
+
     setNotice(createNotice(t('orderPlaced'), 'success'))
     setCheckoutForm((current) => ({
       ...current,
@@ -1512,7 +1527,7 @@ function App() {
 
     ;(async () => {
       try {
-        await waitForPaidOrder(pending.orderId, pending.mobileNumber)
+        const paymentStatus = await waitForPaidOrder(pending.orderId, pending.mobileNumber)
 
         if (!active) {
           return
@@ -1521,8 +1536,20 @@ function App() {
         clearPendingCheckout()
 
         if (pending.checkoutData) {
-          await finishOrderSuccess(pending.checkoutData)
+          await finishOrderSuccess({
+            ...pending.checkoutData,
+            daily_limit: paymentStatus?.daily_limit || pending.checkoutData.daily_limit,
+          })
           return
+        }
+
+        try {
+          const freshCatalog = await loadCatalog({ force: true })
+          if (active) {
+            setCatalog(freshCatalog)
+          }
+        } catch {
+          // ignore catalog refresh errors here
         }
 
         setNotice(createNotice(t('orderPlaced'), 'success'))
@@ -1566,8 +1593,11 @@ function App() {
       || normalizePhoneForLoyalty(checkoutForm.customer_phone)
 
     try {
-      await waitForPaidOrder(data.order.id, mobileNumber)
-      await finishOrderSuccess(data)
+      const paymentStatus = await waitForPaidOrder(data.order.id, mobileNumber)
+      await finishOrderSuccess({
+        ...data,
+        daily_limit: paymentStatus?.daily_limit || data.daily_limit,
+      })
     } catch (error) {
       setNotice(createNotice(getFirstErrorMessage(error, t('paymentProcessingFail')), 'error'))
       throw error
@@ -1683,9 +1713,10 @@ function App() {
             <MapPin />
           </a>
         </div>
-        <p>
-          &copy; {new Date().getFullYear()} {settings.cafe_name || 'Cafe 67'}. {t('allRightsReserved')}
-        </p>
+        <div className="home-footer-tagline">
+          <strong>{t('footerTagline')}</strong>
+          <p>{t('footerSubline')}</p>
+        </div>
       </div>
 
     </section>
@@ -2614,6 +2645,7 @@ function App() {
         orderedCount={orderedCount}
         cupLimit={cupLimit}
         soldOut={isOrderingDisabled}
+        cafeName={settings.cafe_name || 'Cafe 67'}
         money={(value) => money(value, locale)}
         addToCart={addToCart}
         setQuantity={setQuantity}
@@ -2677,7 +2709,7 @@ function App() {
           className="checkout-link"
           type="button"
           disabled={cartItems.length === 0 || isOrderingDisabled}
-          onClick={() => openOrderModal(2)}
+          onClick={() => openOrderModal(1)}
         >
           {t('goToCheckout')}
         </button>
