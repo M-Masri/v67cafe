@@ -3741,13 +3741,26 @@ button:disabled {
   min-width: 0;
 }
 
+.order-checkout-contact-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(88px, 0.55fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.order-checkout-field--car {
+  min-width: 0;
+}
+
 .order-checkout-field--full,
 .order-cup-type-field,
 .order-loyalty-box.order-checkout-field--phone {
   grid-column: 1 / -1;
 }
 
-.order-checkout-grid label {
+.order-checkout-grid > label,
+.order-checkout-contact-row > label {
   display: grid;
   gap: 8px;
   font-size: 0.76rem;
@@ -3755,6 +3768,20 @@ button:disabled {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #76593b;
+}
+
+.order-checkout-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  line-height: 1.2;
+}
+
+.field-required-mark {
+  color: #d83b32;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .order-checkout-grid input,
@@ -4470,7 +4497,8 @@ button:disabled {
     font-size: 0.74rem;
   }
 
-  .order-checkout-grid label {
+  .order-checkout-grid > label,
+  .order-checkout-contact-row > label {
     font-size: 0.68rem;
     letter-spacing: 0.12em;
   }

@@ -215,6 +215,7 @@ const translations = {
     cartEmpty: 'Your cart is empty.',
     cupsNotEnough: 'Not enough cups remain today for this cart.',
     mobileRequired: 'Mobile number is required to place the order.',
+    carNumberRequired: 'Car plate number is required.',
     placeOrderFail: 'Failed to place order.',
     paymentProcessingFail: 'Payment is still processing. Check your orders shortly.',
     completingPayment: 'Completing your payment',
@@ -348,6 +349,7 @@ const translations = {
     cartEmpty: 'سلتك فاضية.',
     cupsNotEnough: 'الكمية المتبقية اليوم ما تكفي لهالسلة.',
     mobileRequired: 'رقم الجوال مطلوب لإتمام الطلب.',
+    carNumberRequired: 'لوحة السيارة مطلوبة.',
     placeOrderFail: 'صار خطأ في إرسال الطلب.',
     paymentProcessingFail: 'الدفع لسه قيد المعالجة. راجع طلباتك بعد شوي.',
     completingPayment: 'جاري إتمام الدفع',
@@ -1439,6 +1441,11 @@ function App() {
       return false
     }
 
+    if (!checkoutForm.car_number?.trim()) {
+      setNotice(createNotice(t('carNumberRequired'), 'error'))
+      return false
+    }
+
     return true
   }
 
@@ -1889,7 +1896,9 @@ function App() {
           <h2>{t('deliveryInformation')}</h2>
         </div>
         <label>
-          {t('fullName')}
+          <span className="order-checkout-label">
+            {t('fullName')} <span className="field-required-mark" aria-hidden="true">*</span>
+          </span>
           <input
             required
             value={checkoutForm.customer_name}
@@ -1899,7 +1908,9 @@ function App() {
           />
         </label>
         <label>
-          {t('phoneNumber')}
+          <span className="order-checkout-label">
+            {t('phoneNumber')} <span className="field-required-mark" aria-hidden="true">*</span>
+          </span>
           <PhoneInput
             country="ae"
             countryCodeEditable
@@ -1908,6 +1919,7 @@ function App() {
             inputClass="phone-field-input"
             buttonClass="phone-field-flag"
             value={normalizePhoneForInput(checkoutForm.customer_phone)}
+            inputProps={{ autoComplete: 'tel' }}
             onChange={(value) => {
               const normalizedValue = normalizePhoneForStorage(value)
               setCheckoutForm((current) => (
@@ -1919,9 +1931,10 @@ function App() {
           />
         </label>
         <label>
-          {t('carNumber')}
+          <span className="order-checkout-label">
+            {t('carNumber')} <span className="field-required-mark" aria-hidden="true">*</span>
+          </span>
           <input
-            required
             inputMode="numeric"
             autoComplete="off"
             value={checkoutForm.car_number}

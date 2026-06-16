@@ -41,6 +41,7 @@ const modalTranslations = {
     carNumber: 'Car number',
     phoneNumber: 'Your phone number',
     validPhone: 'Enter a valid UAE phone number.',
+    carNumberRequired: 'Car plate number is required.',
     checkingLoyalty: 'Checking loyalty status...',
     loadingMenu: 'Loading menu...',
     useReward: 'Use free cup reward ({count} available)',
@@ -95,6 +96,7 @@ const modalTranslations = {
     carNumber: 'لوحة سيارتك',
     phoneNumber: 'رقم تلفونك',
     validPhone: 'أدخل رقم جوال إماراتي صحيح.',
+    carNumberRequired: 'لوحة السيارة مطلوبة.',
     checkingLoyalty: 'جاري التحقق من الولاء...',
     loadingMenu: 'جاري تحميل القائمة...',
     useReward: 'استخدم مكافأة كوب مجاني ({count} متاح)',
@@ -307,6 +309,14 @@ function getProductCategoryIconSrc(product) {
   return '/coffee-beans.svg'
 }
 
+function RequiredMark() {
+  return <span className="field-required-mark" aria-hidden="true">*</span>
+}
+
+function CheckoutFieldLabel({ children }) {
+  return <span className="order-checkout-label">{children}</span>
+}
+
 function OrderProductImage({ product, fallbackSrc }) {
   const imageUrl = getProductImageUrl(product, fallbackSrc)
   const [useFallbackIcon, setUseFallbackIcon] = useState(!imageUrl)
@@ -471,7 +481,8 @@ function OrderNowModal({
     [userAddresses],
   )
   const isCheckoutPhoneValid = isValidUaePhone(checkoutForm.customer_phone)
-  const canPlaceOrder = cartCups > 0 && !soldOut && isCheckoutPhoneValid
+  const isCarNumberValid = Boolean(checkoutForm.car_number?.trim())
+  const canPlaceOrder = cartCups > 0 && !soldOut && isCheckoutPhoneValid && isCarNumberValid
   const checkoutContact = useMemo(
     () => ({
       email: resolveCheckoutEmail({
@@ -801,45 +812,52 @@ function OrderNowModal({
                   </div>
                 </fieldset>
 
-                <label className="order-checkout-field order-checkout-field--phone">
-                  {t('phoneNumber')}
-                  <PhoneInput
-                    country="ae"
-                    onlyCountries={['ae']}
-                    countryCodeEditable={false}
-                    enableSearch={false}
-                    disableDropdown={false}
-                    placeholder="50 123 4567"
-                    containerClass="phone-field"
-                    inputClass="phone-field-input"
-                    buttonClass="phone-field-flag"
-                    preferredCountries={['ae']}
-                    value={normalizePhoneForInput(checkoutForm.customer_phone)}
-                    onChange={(value) => {
-                      const normalizedValue = normalizePhoneForStorage(value)
-                      setCheckoutForm((current) => (
-                        current.customer_phone === normalizedValue
-                          ? current
-                          : { ...current, customer_phone: normalizedValue }
-                      ))
-                    }}
-                  />
-                </label>
+                <div className="order-checkout-contact-row">
+                  <label className="order-checkout-field order-checkout-field--phone">
+                    <CheckoutFieldLabel>
+                      {t('phoneNumber')} <RequiredMark />
+                    </CheckoutFieldLabel>
+                    <PhoneInput
+                      country="ae"
+                      onlyCountries={['ae']}
+                      countryCodeEditable={false}
+                      enableSearch={false}
+                      disableDropdown={false}
+                      placeholder="50 123 4567"
+                      containerClass="phone-field"
+                      inputClass="phone-field-input"
+                      buttonClass="phone-field-flag"
+                      preferredCountries={['ae']}
+                      value={normalizePhoneForInput(checkoutForm.customer_phone)}
+                      inputProps={{ autoComplete: 'tel' }}
+                      onChange={(value) => {
+                        const normalizedValue = normalizePhoneForStorage(value)
+                        setCheckoutForm((current) => (
+                          current.customer_phone === normalizedValue
+                            ? current
+                            : { ...current, customer_phone: normalizedValue }
+                        ))
+                      }}
+                    />
+                  </label>
 
-                <label className="order-checkout-field">
-                  {t('carNumber')}
-                  <input
-                    inputMode="numeric"
-                    autoComplete="off"
-                    value={checkoutForm.car_number}
-                    onChange={(event) =>
-                      setCheckoutForm({ ...checkoutForm, car_number: sanitizeDigitsOnly(event.target.value) })
-                    }
-                  />
-                </label>
+                  <label className="order-checkout-field order-checkout-field--car">
+                    <CheckoutFieldLabel>
+                      {t('carNumber')} <RequiredMark />
+                    </CheckoutFieldLabel>
+                    <input
+                      inputMode="numeric"
+                      autoComplete="off"
+                      value={checkoutForm.car_number}
+                      onChange={(event) =>
+                        setCheckoutForm({ ...checkoutForm, car_number: sanitizeDigitsOnly(event.target.value) })
+                      }
+                    />
+                  </label>
+                </div>
 
                 <label className="order-checkout-field order-checkout-field--full">
-                  {t('carBrand')}
+                  <CheckoutFieldLabel>{t('carBrand')}</CheckoutFieldLabel>
                   <input
                     value={checkoutForm.car_type}
                     onChange={(event) =>
