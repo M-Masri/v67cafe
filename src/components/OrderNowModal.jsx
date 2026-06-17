@@ -6,6 +6,12 @@ import StripePaymentStep from './StripePaymentStep'
 import { resolveCheckoutEmail } from '../lib/checkout'
 import { getProductImageUrl } from '../lib/media'
 import { getStripe } from '../lib/stripe'
+import {
+  isValidUaePhone,
+  normalizePhoneForInput,
+  normalizePhoneForStorage,
+  normalizePhoneOnComplete,
+} from '../lib/phone'
 
 const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
 
@@ -268,22 +274,8 @@ function writeVehicleProfileCookie(profile) {
   document.cookie = `${VEHICLE_PROFILE_COOKIE}=${value}; path=/; max-age=${maxAge}; samesite=lax`
 }
 
-function normalizePhoneForStorage(value) {
-  const digits = String(value || '').replace(/\D/g, '')
-
-  return digits ? `+${digits}` : ''
-}
-
-function normalizePhoneForInput(value) {
-  return String(value || '').replace(/\D/g, '')
-}
-
 function sanitizeDigitsOnly(value) {
   return String(value || '').replace(/\D/g, '')
-}
-
-function isValidUaePhone(value) {
-  return /^\+971[0-9]{9}$/.test(String(value || ''))
 }
 
 function getProductCategoryIconSrc(product) {
@@ -837,6 +829,15 @@ function OrderNowModal({
                             ? current
                             : { ...current, customer_phone: normalizedValue }
                         ))
+                      }}
+                      onBlur={() => {
+                        setCheckoutForm((current) => {
+                          const normalizedValue = normalizePhoneOnComplete(current.customer_phone)
+
+                          return current.customer_phone === normalizedValue
+                            ? current
+                            : { ...current, customer_phone: normalizedValue }
+                        })
                       }}
                     />
                   </label>

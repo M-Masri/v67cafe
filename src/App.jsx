@@ -31,11 +31,18 @@ import fallbackLogo from './assets/v67-logo.svg'
 import CheckoutComplete from './components/CheckoutComplete'
 import MaintenanceModal from './components/MaintenanceModal'
 import OrderNowModal from './components/OrderNowModal'
+import OrderSuccessModal from './components/OrderSuccessModal'
 import HeroIconMarquee from './components/HeroIconMarquee'
 import { clearPendingCheckout, readPendingCheckout } from './lib/checkout'
 import { requestJson } from './config/api'
 import { loadCatalog } from './lib/catalog'
 import { subscribeMaintenance } from './lib/maintenance'
+import {
+  isValidUaePhone,
+  normalizePhoneForInput,
+  normalizePhoneForStorage,
+  normalizePhoneOnComplete,
+} from './lib/phone'
 import { getProductImageUrl } from './lib/media'
 import { getStripe } from './lib/stripe'
 const homeHeroLogo = '/v67_logo_C64429.webp'
@@ -225,6 +232,13 @@ const translations = {
     checkoutSessionMissing: 'We could not find your checkout session. If you were charged, contact the cafe.',
     loyaltyFail: 'Failed to check loyalty status.',
     orderPlaced: 'Your order has been received successfully.',
+    orderSuccessKicker: 'Payment successful',
+    orderSuccessTitle: 'Your order is confirmed',
+    orderSuccessBody: 'Thank you. Your order is now being prepared and will be ready for pickup soon.',
+    orderSuccessProcessing: 'Under processing',
+    orderSuccessOrderNumber: 'Order number',
+    orderSuccessLocationCta: 'Get directions',
+    orderSuccessDone: 'Back to home',
     pages: {
       '/': {
         label: 'Home',
@@ -359,6 +373,13 @@ const translations = {
     checkoutSessionMissing: 'ما لقينا جلسة الدفع. إذا انخصم المبلغ، تواصل مع المقهى.',
     loyaltyFail: 'صار خطأ أثناء التحقق من الولاء.',
     orderPlaced: 'تم استلام طلبك بنجاح.',
+    orderSuccessKicker: 'الدفع تم',
+    orderSuccessTitle: 'طلبك تأكد',
+    orderSuccessBody: 'يعطيك العافية. طلبك الحين قيد التحضير وبنجهزه لك بأسرع وقت.',
+    orderSuccessProcessing: 'قيد التحضير',
+    orderSuccessOrderNumber: 'رقم الطلب',
+    orderSuccessLocationCta: 'وين المقهى؟',
+    orderSuccessDone: 'رجع للرئيسية',
     pages: {
       '/': {
         label: 'الرئيسية',
@@ -448,22 +469,8 @@ function normalizeWhatsAppLink(value) {
   return digits ? `https://wa.me/${digits}` : '#'
 }
 
-function normalizePhoneForStorage(value) {
-  const digits = String(value || '').replace(/\D/g, '')
-
-  return digits ? `+${digits}` : ''
-}
-
-function normalizePhoneForInput(value) {
-  return String(value || '').replace(/\D/g, '')
-}
-
 function sanitizeDigitsOnly(value) {
   return String(value || '').replace(/\D/g, '')
-}
-
-function isValidUaePhone(value) {
-  return /^\+971[0-9]{9}$/.test(String(value || ''))
 }
 
 function InstagramIcon(props) {
@@ -660,6 +667,14 @@ function getFirstErrorMessage(error, fallback) {
   return error?.message || fallback
 }
 
+function resolveOrderNumber(data, paymentStatus = null) {
+  return data?.order?.order_number
+    || data?.order_number
+    || paymentStatus?.order_number
+    || paymentStatus?.order?.order_number
+    || null
+}
+
 function createNotice(message, tone = 'success') {
   return { message, tone }
 }
@@ -756,6 +771,7 @@ function App() {
   })
   const [modalPendingOrder, setModalPendingOrder] = useState(null)
   const [maintenance, setMaintenance] = useState({ active: false, message: null })
+  const [orderSuccess, setOrderSuccess] = useState(null)
   const locale = language === 'ar' ? 'ar-AE' : 'en-AE'
   const isArabic = language === 'ar'
   const t = (key) => getTranslation(language, key)
@@ -796,12 +812,12 @@ function App() {
   }, [])
 
   useEffect(() => {
-    document.body.style.overflow = maintenance.active ? 'hidden' : ''
+    document.body.style.overflow = maintenance.active || orderSuccess ? 'hidden' : ''
 
     return () => {
       document.body.style.overflow = ''
     }
-  }, [maintenance.active])
+  }, [maintenance.active, orderSuccess])
 
   useEffect(() => {
     let active = true
@@ -1007,6 +1023,7 @@ function App() {
     logo_url: fallbackLogo,
     phone: '+1 555 670 067',
     whatsapp: '+1 555 670 067',
+    location_url: null,
     opens_at: '08:00',
     closes_at: '21:00',
   }
@@ -1059,7 +1076,7 @@ function App() {
   const socialLinks = {
     call: phoneDigits ? `tel:${phoneDigits}` : '#',
     instagram: settings.social_links?.instagram || '#',
-    location: settings.social_links?.location || settings.social_links?.maps || settings.location_url || '#',
+    location: settings.location_url || settings.social_links?.location || settings.social_links?.maps || '#',
   }
   const marqueeItems = useMemo(
     () => [
@@ -1482,7 +1499,9 @@ function App() {
     return true
   }
 
-  const finishOrderSuccess = async (data) => {
+  const finishOrderSuccess = async (data, paymentStatus = null) => {
+    const orderNumber = resolveOrderNumber(data, paymentStatus)
+
     setCart([])
     setOrderModalOpen(false)
     setModalPendingOrder(null)
@@ -1500,7 +1519,7 @@ function App() {
       }
     }
 
-    setNotice(createNotice(t('orderPlaced'), 'success'))
+    setOrderSuccess({ orderNumber })
     setCheckoutForm((current) => ({
       ...current,
       cup_type: 'carton',
@@ -1513,6 +1532,10 @@ function App() {
     }
 
     openPage('/')
+  }
+
+  const closeOrderSuccessModal = () => {
+    setOrderSuccess(null)
   }
 
   const waitForPaidOrder = async (orderId, mobileNumber) => {
@@ -1576,24 +1599,25 @@ function App() {
         clearPendingCheckout()
 
         if (pending.checkoutData) {
-          await finishOrderSuccess({
-            ...pending.checkoutData,
-            daily_limit: paymentStatus?.daily_limit || pending.checkoutData.daily_limit,
-          })
+          await finishOrderSuccess(
+            {
+              ...pending.checkoutData,
+              daily_limit: paymentStatus?.daily_limit || pending.checkoutData.daily_limit,
+            },
+            paymentStatus,
+          )
           return
         }
 
-        try {
-          const freshCatalog = await loadCatalog({ force: true })
-          if (active) {
-            setCatalog(freshCatalog)
-          }
-        } catch {
-          // ignore catalog refresh errors here
-        }
-
-        setNotice(createNotice(t('orderPlaced'), 'success'))
-        openPage('/')
+        await finishOrderSuccess(
+          {
+            order: {
+              order_number: paymentStatus?.order_number || paymentStatus?.order?.order_number || null,
+            },
+            daily_limit: paymentStatus?.daily_limit,
+          },
+          paymentStatus,
+        )
       } catch (error) {
         if (!active) {
           return
@@ -1634,10 +1658,13 @@ function App() {
 
     try {
       const paymentStatus = await waitForPaidOrder(data.order.id, mobileNumber)
-      await finishOrderSuccess({
-        ...data,
-        daily_limit: paymentStatus?.daily_limit || data.daily_limit,
-      })
+      await finishOrderSuccess(
+        {
+          ...data,
+          daily_limit: paymentStatus?.daily_limit || data.daily_limit,
+        },
+        paymentStatus,
+      )
     } catch (error) {
       setNotice(createNotice(getFirstErrorMessage(error, t('paymentProcessingFail')), 'error'))
       throw error
@@ -1960,6 +1987,15 @@ function App() {
                   ? current
                   : { ...current, customer_phone: normalizedValue }
               ))
+            }}
+            onBlur={() => {
+              setCheckoutForm((current) => {
+                const normalizedValue = normalizePhoneOnComplete(current.customer_phone)
+
+                return current.customer_phone === normalizedValue
+                  ? current
+                  : { ...current, customer_phone: normalizedValue }
+              })
             }}
           />
         </label>
@@ -2610,6 +2646,23 @@ function App() {
       {maintenance.active ? (
         <MaintenanceModal isArabic={isArabic} message={maintenance.message} />
       ) : null}
+
+      <OrderSuccessModal
+        isOpen={Boolean(orderSuccess)}
+        orderNumber={orderSuccess?.orderNumber}
+        cafeName={settings.cafe_name || 'Cafe 67'}
+        locationUrl={socialLinks.location}
+        labels={{
+          kicker: t('orderSuccessKicker'),
+          title: t('orderSuccessTitle'),
+          body: t('orderSuccessBody'),
+          processingLabel: t('orderSuccessProcessing'),
+          orderNumberLabel: t('orderSuccessOrderNumber'),
+          locationCta: t('orderSuccessLocationCta'),
+          doneCta: t('orderSuccessDone'),
+        }}
+        onClose={closeOrderSuccessModal}
+      />
 
     <main className={`site-shell route-${path === '/checkout/complete' ? 'checkout-complete' : activePage.path === '/' ? 'home' : activePage.path.slice(1).replaceAll('/', '-')}`} dir={isArabic ? 'rtl' : 'ltr'}>
       {path !== '/' && path !== '/checkout/complete' ? (
