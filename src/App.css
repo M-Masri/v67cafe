@@ -3163,6 +3163,55 @@ button:disabled {
   backdrop-filter: blur(14px);
 }
 
+.maintenance-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top, rgba(216, 59, 50, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(24, 16, 12, 0.96), rgba(12, 8, 6, 0.98));
+  backdrop-filter: blur(18px);
+}
+
+.maintenance-modal__card {
+  width: min(420px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 34px 28px 30px;
+  border: 1px solid rgba(255, 244, 203, 0.16);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(216, 59, 50, 0.1), transparent 36%),
+    linear-gradient(180deg, rgba(255, 248, 212, 0.99), rgba(255, 244, 203, 0.98));
+  box-shadow: 0 34px 90px rgba(20, 14, 10, 0.42);
+  text-align: center;
+}
+
+.maintenance-modal__logo {
+  width: min(180px, 58vw);
+  height: auto;
+  object-fit: contain;
+}
+
+.maintenance-modal__title {
+  margin: 0;
+  color: #442d1f;
+  font-size: clamp(1.5rem, 5vw, 1.9rem);
+  line-height: 1.15;
+}
+
+.maintenance-modal__body {
+  margin: 0;
+  color: rgba(68, 45, 31, 0.78);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 34ch;
+}
+
 .order-modal {
   width: min(1080px, 100%);
   max-height: min(960px, calc(100svh - 24px));

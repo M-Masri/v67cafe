@@ -29,11 +29,13 @@ import './App.css'
 const PhoneInput = ReactPhoneInput?.default || ReactPhoneInput
 import fallbackLogo from './assets/v67-logo.svg'
 import CheckoutComplete from './components/CheckoutComplete'
+import MaintenanceModal from './components/MaintenanceModal'
 import OrderNowModal from './components/OrderNowModal'
 import HeroIconMarquee from './components/HeroIconMarquee'
 import { clearPendingCheckout, readPendingCheckout } from './lib/checkout'
 import { requestJson } from './config/api'
 import { loadCatalog } from './lib/catalog'
+import { subscribeMaintenance } from './lib/maintenance'
 import { getProductImageUrl } from './lib/media'
 import { getStripe } from './lib/stripe'
 const homeHeroLogo = '/v67_logo_C64429.webp'
@@ -753,6 +755,7 @@ function App() {
     },
   })
   const [modalPendingOrder, setModalPendingOrder] = useState(null)
+  const [maintenance, setMaintenance] = useState({ active: false, message: null })
   const locale = language === 'ar' ? 'ar-AE' : 'en-AE'
   const isArabic = language === 'ar'
   const t = (key) => getTranslation(language, key)
@@ -789,6 +792,18 @@ function App() {
   }
 
   useEffect(() => {
+    return subscribeMaintenance(setMaintenance)
+  }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = maintenance.active ? 'hidden' : ''
+
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [maintenance.active])
+
+  useEffect(() => {
     let active = true
     let hasLoadedOnce = false
 
@@ -803,7 +818,7 @@ function App() {
         setCatalog(data)
         hasLoadedOnce = true
       } catch (error) {
-        if (active && showErrorNotice) {
+        if (active && showErrorNotice && !error?.isMaintenance) {
           setNotice(createNotice(error.message, 'error'))
         }
       } finally {
@@ -2591,6 +2606,11 @@ function App() {
   }
 
   return (
+    <>
+      {maintenance.active ? (
+        <MaintenanceModal isArabic={isArabic} message={maintenance.message} />
+      ) : null}
+
     <main className={`site-shell route-${path === '/checkout/complete' ? 'checkout-complete' : activePage.path === '/' ? 'home' : activePage.path.slice(1).replaceAll('/', '-')}`} dir={isArabic ? 'rtl' : 'ltr'}>
       {path !== '/' && path !== '/checkout/complete' ? (
         <header className={`site-nav ${scrolled ? 'is-scrolled' : ''}`}>
@@ -2768,6 +2788,7 @@ function App() {
         </nav>
       </aside>
     </main>
+    </>
   )
 }
 

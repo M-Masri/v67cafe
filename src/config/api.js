@@ -1,3 +1,5 @@
+import { activateMaintenance } from '../lib/maintenance'
+
 const DEFAULT_API_URL = 'http://127.0.0.1:8000/api'
 
 function normalizeApiBaseUrl(value) {
@@ -39,10 +41,20 @@ export async function requestJson(pathOrUrl, options = {}, authToken = null) {
 
   const data = await response.json().catch(() => ({}))
 
+  if (response.status === 503) {
+    activateMaintenance(data.message || null)
+
+    const error = new Error(data.message || 'Service unavailable.')
+    error.status = 503
+    error.isMaintenance = true
+    throw error
+  }
+
   if (!response.ok) {
     const error = new Error(
       data.message || Object.values(data.errors || {})?.[0]?.[0] || 'Request failed.',
     )
+    error.status = response.status
     error.errors = data.errors || null
     throw error
   }
