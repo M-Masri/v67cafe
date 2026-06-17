@@ -737,9 +737,18 @@ function App() {
     currency: 'aed',
     return_url: null,
     payment_element: {
+      express_checkout: {
+        paymentMethods: {
+          applePay: 'always',
+          googlePay: 'always',
+        },
+        layout: {
+          maxColumns: 2,
+        },
+      },
       wallets: {
-        applePay: 'auto',
-        googlePay: 'auto',
+        applePay: 'never',
+        googlePay: 'never',
       },
     },
   })
@@ -841,9 +850,18 @@ function App() {
           currency: 'aed',
           return_url: null,
           payment_element: {
+            express_checkout: {
+              paymentMethods: {
+                applePay: 'always',
+                googlePay: 'always',
+              },
+              layout: {
+                maxColumns: 2,
+              },
+            },
             wallets: {
-              applePay: 'auto',
-              googlePay: 'auto',
+              applePay: 'never',
+              googlePay: 'never',
             },
           },
         })

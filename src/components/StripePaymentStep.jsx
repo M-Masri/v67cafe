@@ -1,29 +1,54 @@
 import { useMemo, useState } from 'react'
 import {
   CheckoutElementsProvider,
+  ExpressCheckoutElement,
   PaymentElement,
   useCheckoutElements,
 } from '@stripe/react-stripe-js/checkout'
 import { persistPendingCheckout } from '../lib/checkout'
 
-const DEFAULT_PAYMENT_ELEMENT_OPTIONS = {
-  wallets: {
-    applePay: 'auto',
-    googlePay: 'auto',
+const DEFAULT_EXPRESS_CHECKOUT_OPTIONS = {
+  paymentMethods: {
+    applePay: 'always',
+    googlePay: 'always',
+  },
+  layout: {
+    maxColumns: 2,
   },
 }
 
-function getPaymentElementOptions(paymentConfig) {
-  const wallets = paymentConfig?.payment_element?.wallets
+const DEFAULT_PAYMENT_ELEMENT_OPTIONS = {
+  wallets: {
+    applePay: 'never',
+    googlePay: 'never',
+  },
+}
 
-  if (!wallets) {
+function getExpressCheckoutOptions(paymentConfig) {
+  const expressCheckout = paymentConfig?.payment_element?.express_checkout
+
+  if (!expressCheckout) {
+    return DEFAULT_EXPRESS_CHECKOUT_OPTIONS
+  }
+
+  return expressCheckout
+}
+
+function getPaymentElementOptions(paymentConfig) {
+  const paymentElement = paymentConfig?.payment_element
+
+  if (!paymentElement) {
     return DEFAULT_PAYMENT_ELEMENT_OPTIONS
   }
 
-  return { wallets }
+  return {
+    ...paymentElement,
+    wallets: paymentElement.wallets || DEFAULT_PAYMENT_ELEMENT_OPTIONS.wallets,
+  }
 }
 
 function PaymentForm({
+  expressCheckoutOptions,
   paymentElementOptions,
   checkoutContact,
   pendingCheckout,
@@ -36,6 +61,7 @@ function PaymentForm({
 }) {
   const checkoutState = useCheckoutElements()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [hasExpressCheckout, setHasExpressCheckout] = useState(false)
   const isBusy = isPaying || isSubmitting
 
   const handlePay = async () => {
@@ -83,6 +109,38 @@ function PaymentForm({
     }
   }
 
+  const handleConfirmExpressCheckout = async (event) => {
+    if (checkoutState.type !== 'success' || isBusy) {
+      return
+    }
+
+    setIsSubmitting(true)
+    onPayStart?.()
+    persistPendingCheckout(pendingCheckout)
+
+    try {
+      const result = await checkoutState.checkout.confirm({
+        expressCheckoutConfirmEvent: event,
+        redirect: 'if_required',
+      })
+
+      if (result.type === 'error') {
+        onPayError(result.error.message)
+        return
+      }
+
+      await onPaySuccess?.()
+    } catch (error) {
+      onPayError(error?.message || 'Payment failed.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleExpressCheckoutReady = ({ availablePaymentMethods }) => {
+    setHasExpressCheckout(Boolean(availablePaymentMethods))
+  }
+
   if (checkoutState.type === 'loading') {
     return <p className="order-modal-loading-copy">Loading payment...</p>
   }
@@ -93,6 +151,20 @@ function PaymentForm({
 
   return (
     <div className="stripe-payment-form">
+      <div className="stripe-express-checkout">
+        <ExpressCheckoutElement
+          options={expressCheckoutOptions}
+          onConfirm={handleConfirmExpressCheckout}
+          onReady={handleExpressCheckoutReady}
+        />
+      </div>
+
+      {hasExpressCheckout ? (
+        <div className="stripe-payment-divider" aria-hidden="true">
+          <span>OR</span>
+        </div>
+      ) : null}
+
       <PaymentElement options={paymentElementOptions} />
       <button
         type="button"
@@ -121,6 +193,10 @@ export default function StripePaymentStep({
   onPaySuccess,
   onPayError,
 }) {
+  const expressCheckoutOptions = useMemo(
+    () => getExpressCheckoutOptions(paymentConfig),
+    [paymentConfig],
+  )
   const paymentElementOptions = useMemo(
     () => getPaymentElementOptions(paymentConfig),
     [paymentConfig],
@@ -142,6 +218,7 @@ export default function StripePaymentStep({
   return (
     <CheckoutElementsProvider stripe={stripePromise} options={checkoutOptions}>
       <PaymentForm
+        expressCheckoutOptions={expressCheckoutOptions}
         paymentElementOptions={paymentElementOptions}
         checkoutContact={checkoutContact}
         pendingCheckout={pendingCheckout}

@@ -4071,6 +4071,28 @@ button:disabled {
   gap: 18px;
 }
 
+.stripe-express-checkout {
+  min-height: 0;
+}
+
+.stripe-payment-divider {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  color: rgba(68, 45, 31, 0.55);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.stripe-payment-divider::before,
+.stripe-payment-divider::after {
+  content: '';
+  height: 1px;
+  background: rgba(68, 45, 31, 0.14);
+}
+
 .stripe-payment-shell {
   position: relative;
 }
